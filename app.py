@@ -53,20 +53,20 @@ def create_app():
     @app.context_processor
     def inject_user():
         return dict(current_user=get_current_user())
-        
+
     @app.route("/")
     def home():
-        return "Korjaamo Kaveri toimii 🚀"     
+        return "Korjaamo Kaveri toimii 🚀"
 
     @app.route("/logged-out")
     def logged_out():
         return render_template_string(LOGOUT_PAGE)
-        
+
     @app.route("/make-admin-temp")
-        def make_admin_temp():
-    make_user_admin("ville_salovaara@hotmail.com")
-    return "Admin-oikeus annettu"
-    
+    def make_admin_temp():
+        make_user_admin("ville_salovaara@hotmail.com")
+        return "Admin-oikeus annettu"
+
     return app
 
 def cli_test():
