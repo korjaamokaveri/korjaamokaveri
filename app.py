@@ -53,6 +53,10 @@ def create_app():
     @app.context_processor
     def inject_user():
         return dict(current_user=get_current_user())
+        
+    @app.route("/")
+    def home():
+        return "Korjaamo Kaveri toimii 🚀"     
 
     @app.route("/logged-out")
     def logged_out():
