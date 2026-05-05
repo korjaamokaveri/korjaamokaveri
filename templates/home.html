@@ -1,0 +1,482 @@
+{% extends "base.html" %}
+
+{% block title %}Korjaamo Kaveri{% endblock %}
+
+{% block extra_css %}
+<style>
+    * { box-sizing: border-box; }
+
+    :root {
+        --bg-1: #0f172a;
+        --bg-2: #1e293b;
+        --card: #ffffff;
+        --muted: #64748b;
+        --text: #0f172a;
+        --line: #e2e8f0;
+        --primary: #2563eb;
+        --primary-dark: #1d4ed8;
+        --success-bg: #dcfce7;
+        --success-text: #166534;
+        --warn-bg: #fef3c7;
+        --warn-text: #92400e;
+        --danger-bg: #fee2e2;
+        --danger-text: #991b1b;
+        --pill-bg: #dbeafe;
+        --pill-text: #1d4ed8;
+        --shadow: 0 20px 60px rgba(0, 0, 0, 0.22);
+    }
+
+    body {
+        background:
+            radial-gradient(circle at top left, rgba(37,99,235,0.22), transparent 30%),
+            linear-gradient(180deg, var(--bg-1), var(--bg-2));
+        color: var(--text);
+    }
+
+    .hero { color: white; margin: 8px 0 24px; }
+    .hero-title { font-size: 42px; font-weight: 800; margin: 0 0 10px; letter-spacing: -0.03em; }
+    .hero-subtitle { margin: 0; color: #cbd5e1; font-size: 18px; max-width: 760px; line-height: 1.6; }
+
+    .layout { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 22px; }
+    .panel { background: var(--card); border-radius: 24px; box-shadow: var(--shadow); border: 1px solid rgba(255,255,255,0.15); }
+    .form-panel, .result-panel { padding: 24px; }
+    .panel-title { margin: 0 0 8px; font-size: 24px; }
+    .panel-subtitle { margin: 0 0 22px; color: var(--muted); line-height: 1.5; }
+
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .full { grid-column: 1 / -1; }
+
+    label { display: block; margin-bottom: 8px; font-size: 14px; font-weight: 700; color: #334155; }
+
+    input, textarea {
+        width: 100%;
+        border: 1px solid #cbd5e1;
+        background: #f8fafc;
+        border-radius: 16px;
+        padding: 14px 16px;
+        font-size: 16px;
+        outline: none;
+        transition: 0.2s ease;
+    }
+
+    input:focus, textarea:focus {
+        background: #fff;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(37,99,235,0.12);
+    }
+
+    textarea { min-height: 130px; resize: vertical; }
+
+    .btn {
+        border: none;
+        width: 100%;
+        padding: 16px 18px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white;
+        font-size: 16px;
+        font-weight: 800;
+        cursor: pointer;
+    }
+
+    .helper-box, .note-item, .cause-card, .step-card, .vehicle-card, .feedback-box {
+        background: #f8fafc;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+    }
+
+    .helper-box { margin-top: 18px; padding: 16px; }
+    .helper-title { margin: 0 0 10px; font-size: 15px; font-weight: 800; }
+    .helper-list { margin: 0; padding-left: 18px; color: var(--muted); }
+
+    .empty-state {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100%;
+        border: 2px dashed #cbd5e1;
+        border-radius: 20px;
+        padding: 28px;
+        color: var(--muted);
+        text-align: center;
+        background: linear-gradient(180deg, #ffffff, #f8fafc);
+    }
+
+    .result-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+    .result-header h2 { margin: 0 0 6px; font-size: 28px; line-height: 1.1; }
+
+    .muted { color: var(--muted); }
+
+    .vehicle-card { display: flex; gap: 12px; align-items: center; padding: 14px 16px; margin-bottom: 18px; }
+    .vehicle-icon { width: 44px; height: 44px; border-radius: 14px; background: #dbeafe; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+
+    .section { margin-top: 20px; }
+    .section-title { margin: 0 0 12px; font-size: 18px; font-weight: 800; color: #1e293b; }
+
+    .pill-row { display: flex; flex-wrap: wrap; gap: 10px; }
+    .pill { display: inline-flex; align-items: center; gap: 8px; padding: 9px 13px; border-radius: 999px; background: var(--pill-bg); color: var(--pill-text); font-size: 14px; font-weight: 700; }
+
+    .note-list, .step-list { display: grid; gap: 12px; }
+    .note-item { padding: 14px 16px; line-height: 1.5; }
+
+    .cause-card { padding: 16px; margin-bottom: 12px; background: white; }
+    .cause-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 8px; }
+    .cause-name { font-size: 17px; font-weight: 800; color: #0f172a; }
+
+    .badge { padding: 8px 10px; border-radius: 999px; font-size: 13px; font-weight: 800; white-space: nowrap; }
+    .score-high { background: var(--danger-bg); color: var(--danger-text); }
+    .score-mid { background: var(--warn-bg); color: var(--warn-text); }
+    .score-low { background: var(--success-bg); color: var(--success-text); }
+
+    .step-card { display: flex; gap: 14px; padding: 16px; }
+    .step-number { min-width: 38px; height: 38px; border-radius: 12px; background: #dbeafe; color: #1d4ed8; display: flex; align-items: center; justify-content: center; font-weight: 800; }
+    .tools { margin-top: 6px; font-size: 14px; color: var(--muted); }
+
+    .feedback-box { margin-top: 20px; padding: 18px; }
+    .feedback-title { margin: 0 0 12px; font-size: 17px; font-weight: 800; color: #0f172a; }
+    .feedback-subtitle { margin: 0 0 14px; color: var(--muted); line-height: 1.5; }
+    .feedback-current { margin-bottom: 12px; padding: 10px 12px; border-radius: 12px; font-size: 14px; font-weight: 700; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+    .feedback-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+    .feedback-form { margin: 0; }
+    .feedback-btn { border: none; padding: 12px 18px; border-radius: 14px; font-size: 15px; font-weight: 800; cursor: pointer; color: white; }
+    .feedback-yes { background: #16a34a; }
+    .feedback-no { background: #dc2626; }
+    .feedback-note { margin-top: 12px; color: var(--muted); font-size: 14px; }
+
+    .error { margin-top: 18px; background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; border-radius: 16px; padding: 14px 16px; font-weight: 600; }
+    .success { margin-top: 18px; background: #dcfce7; color: #166534; border: 1px solid #86efac; border-radius: 16px; padding: 14px 16px; font-weight: 600; }
+
+    .footer-note { margin-top: 18px; font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+    @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+    @media (max-width: 640px) {
+        .hero-title { font-size: 30px; }
+        .grid { grid-template-columns: 1fr; }
+        .form-panel, .result-panel { padding: 18px; }
+        .feedback-actions { flex-direction: column; }
+        .feedback-form { width: 100%; }
+        .feedback-btn { width: 100%; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h2 class="hero-title">Älykäs vikakoodin tulkinta</h2>
+    <p class="hero-subtitle">
+        Syötä merkki, VIN-numero, vikakoodi ja oireet. Sovellus arvioi todennäköisimmät syyt ja ehdottaa testausjärjestyksen.
+    </p>
+</div>
+
+<div class="layout">
+    <div class="panel form-panel">
+        <h3 class="panel-title">Syötä tiedot</h3>
+        <p class="panel-subtitle">
+            {% if current_user %}
+                Kirjautuneena diagnoosit tallennetaan automaattisesti historiaasi.
+            {% else %}
+                Kirjaudu sisään, niin diagnoosit tallentuvat omaan historiaan.
+            {% endif %}
+        </p>
+
+        <form method="POST"
+              action="{{ url_for('ui_diagnose') }}"
+              enctype="multipart/form-data"
+              onsubmit="handleSubmit(this)">
+            <div class="grid">
+                <div>
+                    <label for="make">Merkki</label>
+                    <input id="make" name="make" placeholder="Esim. Volvo" value="{{ form_data.make if form_data else '' }}" required>
+                </div>
+
+                <div>
+                    <label for="vin">VIN tai rekisterinumero</label>
+                    <input 
+                        id="vin" 
+                        name="vin" 
+                        placeholder="Esim. YV1... tai ABC-123" 
+                        value="{{ form_data.vin if form_data else '' }}" 
+                        required
+>                    
+                </div>
+
+                <div class="full">
+                    <label for="code">DTC / vikakoodi</label>
+                    <input id="code" name="code" placeholder="Esim. P0300" value="{{ form_data.code if form_data else '' }}" required>
+                </div>
+
+                <div class="full">
+                    <label for="symptoms">Oireet</label>
+                    <textarea id="symptoms" name="symptoms" placeholder="Esim. auto nykii, tärisee tyhjäkäynnillä ja tehot puuttuvat" required>{{ form_data.symptoms if form_data else '' }}</textarea>
+                </div>
+
+                <div class="full">
+                    <label for="image">Lisää kuva viasta tai osasta</label>
+                    <input id="image" name="image" type="file" accept=".jpg,.jpeg,.png,.webp,image/*">
+                </div>
+
+                <div class="full" style="margin-top: 8px;">
+                    <label style="display:flex; gap:10px; align-items:flex-start; font-weight:normal;">
+                        <input type="checkbox" name="accept_terms" value="yes" style="width:auto; margin-top:4px;" {% if form_data and form_data.accept_terms %}checked{% endif %}>
+                        <span>
+                            Hyväksyn <a href="{{ url_for('terms') }}" target="_blank">käyttöehdot</a> ja ymmärrän,
+                            että palvelu antaa vain suuntaa-antavan automaattisen arvion.
+                        </span>
+                    </label>
+                </div>
+
+                <div class="full">
+                    <button class="btn" id="submitBtn" type="submit">Hae vikakoodin tulkinta</button>
+                </div>
+            </div>
+        </form>
+
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+
+        {% if success_message %}
+            <div class="success">{{ success_message }}</div>
+        {% endif %}
+
+        <div class="helper-box">
+            <div class="helper-title">Vinkki parempaan tulokseen</div>
+            <ul class="helper-list">
+                <li>Syötä merkki oikein kirjoitettuna</li>
+                <li>Lisää koko VIN-numero, jos se on saatavilla</li>
+                <li>Kerro oireet mahdollisimman tarkasti</li>
+                <li>Korjausohjeet löytyvät omalta Korjausohje-sivulta ylävalikosta</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="panel result-panel">
+        {% if result and result.success %}
+            <div class="result-header">
+                <div>
+                    <h2>{{ result.fault_code }} – {{ result.title }}</h2>
+                    <div class="muted">{{ result.description }}</div>
+                </div>
+            </div>
+
+            {% if result.top_solution %}
+    <div class="section">
+        <div style="padding:16px; background:#fef3c7; border-radius:16px; border:1px solid #fcd34d;">
+            <div style="font-size:18px; font-weight:800; color:#92400e;">
+                🔥 Yleisin ratkaisu tällä vikakoodilla
+            </div>
+
+            <div style="margin-top:8px; font-size:17px; font-weight:800;">
+                {{ result.top_solution.final_cause }}
+            </div>
+
+            <div style="margin-top:6px; color:#92400e;">
+                Perustuu {{ result.top_solution.count }} ratkaistuun tapaukseen.
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+            {% if result.top_solution_with_image %}
+                <div style="margin-top:16px; padding:14px; background:#eff6ff; border-radius:12px; border:1px solid #bfdbfe;">
+                    <strong>Yleisin toteutunut korjaus kuvalla:</strong><br>
+                    {{ result.top_solution_with_image.final_cause }} ({{ result.top_solution_with_image.count }} tapausta)
+
+                    {% if result.top_solution_with_image.resolution_image_path %}
+                        <div style="margin-top:10px;">
+                            <img
+                                src="{{ url_for('static', filename=result.top_solution_with_image.resolution_image_path) }}"
+                                alt="Yleisin korjauskuva"
+                                style="max-width:100%; width:320px; border-radius:12px; border:1px solid #cbd5e1;"
+                            >
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            <div class="vehicle-card">
+                <div class="vehicle-icon">🚗</div>
+                <div>
+                    <div><strong>Ajoneuvo</strong></div>
+                    <div class="muted">
+                        {{ result.vehicle.make }}
+                        {% if result.vehicle.model %} {{ result.vehicle.model }}{% endif %}
+                        {% if result.vehicle.engine %} {{ result.vehicle.engine }}{% endif %}
+                    </div>
+                </div>
+            </div>
+
+            {% if result.matched_symptoms %}
+                <div class="section">
+                    <div class="section-title">Tunnistetut oireet</div>
+                    <div class="pill-row">
+                        {% for symptom in result.matched_symptoms %}
+                            <div class="pill">• {{ symptom }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if result.problem_symptoms or result.mil_status or result.fail_safe_function or result.priority or result.sae_code %}
+                <div class="section">
+                    <div class="section-title">Lisätiedot</div>
+                    <div class="note-list">
+                        {% if result.problem_symptoms %}
+                            <div class="note-item"><strong>Tunnetut oireet:</strong> {{ result.problem_symptoms }}</div>
+                        {% endif %}
+                        {% if result.mil_status %}
+                            <div class="note-item"><strong>MIL-status:</strong> {{ result.mil_status }}</div>
+                        {% endif %}
+                        {% if result.fail_safe_function %}
+                            <div class="note-item"><strong>Fail-safe function:</strong> {{ result.fail_safe_function }}</div>
+                        {% endif %}
+                        {% if result.priority %}
+                            <div class="note-item"><strong>Prioriteetti:</strong> {{ result.priority }}</div>
+                        {% endif %}
+                        {% if result.sae_code %}
+                            <div class="note-item"><strong>SAE-koodi:</strong> {{ result.sae_code }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if result.symptom_notes %}
+                <div class="section">
+                    <div class="section-title">Oireiden perusteella</div>
+                    <div class="note-list">
+                        {% for note in result.symptom_notes %}
+                            <div class="note-item">{{ note }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if result.vehicle_notes %}
+                <div class="section">
+                    <div class="section-title">Ajoneuvokohtaiset huomiot</div>
+                    <div class="note-list">
+                        {% for note in result.vehicle_notes %}
+                            <div class="note-item">{{ note }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="section">
+                <div class="section-title">Todennäköiset syyt</div>
+                {% for cause in result.possible_causes %}
+                    <div class="cause-card">
+                        <div class="cause-top">
+                            <div class="cause-name">{{ cause.name }}</div>
+                            <div class="badge {% if cause.score >= 0.45 %}score-high{% elif cause.score >= 0.25 %}score-mid{% else %}score-low{% endif %}">
+                                score {{ cause.score }}
+                            </div>
+                        </div>
+                        <div class="muted">{{ cause.description }}</div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="section">
+                <div class="section-title">Suositeltu testausjärjestys</div>
+                <div class="step-list">
+                    {% for step in result.test_steps %}
+                        <div class="step-card">
+                            <div class="step-number">{{ step.order }}</div>
+                            <div>
+                                <div><strong>{{ step.title }}</strong></div>
+                                <div class="muted">{{ step.description }}</div>
+                                <div class="tools">Työkalut: {{ step.tools }}</div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            {% if current_user %}
+                <div class="feedback-box">
+                    <div class="feedback-title">Oliko tästä hyötyä?</div>
+                    <div class="feedback-subtitle">
+                        Palautteesi auttaa parantamaan tulevia korjausehdotuksia.
+                    </div>
+
+                    {% if user_feedback is not none %}
+                        <div class="feedback-current">
+                            Nykyinen palautteesi:
+                            {% if user_feedback == 1 %}
+                                👍 Hyödyllinen
+                            {% else %}
+                                👎 Ei hyödyllinen
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
+                    <div class="feedback-actions">
+                        <form class="feedback-form" method="POST" action="{{ url_for('ui_feedback') }}">
+                            {% if diagnosis_id %}
+                                <input type="hidden" name="diagnosis_id" value="{{ diagnosis_id }}">
+                            {% endif %}
+                            <input type="hidden" name="fault_code" value="{{ result.fault_code }}">
+                            <input type="hidden" name="title" value="{{ result.title }}">
+                            <input type="hidden" name="description" value="{{ result.description }}">
+                            <input type="hidden" name="vehicle" value="{{ result.vehicle.make }} {{ result.vehicle.model }} {{ result.vehicle.engine }}">
+                            <input type="hidden" name="helpful" value="1">
+                            <button class="feedback-btn feedback-yes" type="submit">
+                                {% if user_feedback == 1 %}👍 Valittuna{% else %}👍 Kyllä{% endif %}
+                            </button>
+                        </form>
+
+                        <form class="feedback-form" method="POST" action="{{ url_for('ui_feedback') }}">
+                            {% if diagnosis_id %}
+                                <input type="hidden" name="diagnosis_id" value="{{ diagnosis_id }}">
+                            {% endif %}
+                            <input type="hidden" name="fault_code" value="{{ result.fault_code }}">
+                            <input type="hidden" name="title" value="{{ result.title }}">
+                            <input type="hidden" name="description" value="{{ result.description }}">
+                            <input type="hidden" name="vehicle" value="{{ result.vehicle.make }} {{ result.vehicle.model }} {{ result.vehicle.engine }}">
+                            <input type="hidden" name="helpful" value="0">
+                            <button class="feedback-btn feedback-no" type="submit">
+                                {% if user_feedback == 0 %}👎 Valittuna{% else %}👎 Ei{% endif %}
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="feedback-note">
+                        Samasta tiketistä tallennetaan vain yksi palaute per käyttäjä. Uusi valinta päivittää vanhan.
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="footer-note">
+                Vastuu diagnoosin oikeellisuudesta on aina työn suorittajalla tai korjaamolla.
+                Korjaamo Kaverin tuottamat tiedot ovat suuntaa-antavia ja tarkoitettu tukemaan vianhakua.
+            </div>
+
+            <div class="footer-note" style="margin-top:12px;">
+                © 2026 Korjaamo Kaveri. Kaikki oikeudet pidätetään.
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div>
+                    <div style="font-size: 42px; margin-bottom: 10px;">🛠️</div>
+                    <strong>Tulokset näkyvät täällä</strong>
+                    <div style="margin-top: 8px; line-height: 1.6;">
+                        Syötä tiedot vasemmalle ja paina “Hae vikakoodin tulkinta”.
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function handleSubmit(form) {
+    const btn = document.getElementById("submitBtn");
+    if (btn) {
+        btn.disabled = true;
+        btn.innerText = "Analysoidaan...";
+    }
+    return true;
+}
+</script>
+{% endblock %}

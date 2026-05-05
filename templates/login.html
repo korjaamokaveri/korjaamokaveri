@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Kirjaudu{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-wrap {
+        max-width: 520px;
+        margin: 32px auto 0;
+    }
+
+    .auth-title {
+        color: white;
+        margin: 0 0 20px;
+        font-size: 32px;
+        font-weight: 800;
+    }
+
+    .auth-card {
+        background: white;
+        border-radius: 24px;
+        padding: 24px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    }
+
+    .auth-subtitle {
+        margin: 0 0 22px;
+        color: #64748b;
+        line-height: 1.5;
+    }
+
+    .form-group {
+        margin-bottom: 18px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 14px;
+        font-weight: 700;
+        color: #334155;
+    }
+
+    .form-input {
+        width: 100%;
+        box-sizing: border-box;
+        border: 1px solid #cbd5e1;
+        background: #f8fafc;
+        border-radius: 14px;
+        padding: 14px 16px;
+        font-size: 16px;
+        outline: none;
+        transition: 0.2s ease;
+    }
+
+    .form-input:focus {
+        background: #fff;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 4px rgba(37,99,235,0.12);
+    }
+
+    .auth-footer {
+        margin-top: 18px;
+        color: #64748b;
+        font-size: 14px;
+    }
+
+    .auth-footer a {
+        color: #1d4ed8;
+        text-decoration: none;
+        font-weight: 700;
+    }
+
+    .forgot-link {
+        margin-top: 14px;
+    }
+
+    .forgot-link a {
+        color: #1d4ed8;
+        text-decoration: none;
+        font-weight: 700;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+    <h1 class="auth-title">Kirjaudu sisään</h1>
+
+    <div class="auth-card">
+        <p class="auth-subtitle">
+            Kirjaudu sisään nähdäksesi historiatiedot ja tallentaaksesi diagnoosit omalle tilillesi.
+        </p>
+
+        <form method="POST">
+            <div class="form-group">
+                <label for="email">Sähköposti</label>
+                <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    class="form-input"
+                    required
+                    value="{{ email or '' }}"
+                    autocomplete="email"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password">Salasana</label>
+                <input
+                    id="password"
+                    type="password"
+                    name="password"
+                    class="form-input"
+                    required
+                    autocomplete="current-password"
+                >
+            </div>
+
+            <button class="btn" type="submit">Kirjaudu</button>
+        </form>
+
+        <div class="forgot-link">
+            <a href="{{ url_for('forgot_password') }}">Unohditko salasanasi?</a>
+        </div>
+
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+
+        <div class="auth-footer">
+            Ei vielä tiliä? <a href="{{ url_for('register') }}">Rekisteröidy tästä</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Korjaamo Kaveri{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:900px; margin:40px auto;">
+    <h1>Korjaamo Kaveri</h1>
+    <p>Älykäs vikakoodien tulkinta, tiketinhallinta ja myöhemmin maksulliset lisäohjeet.</p>
+
+    <div style="margin-top:20px; display:flex; gap:12px; flex-wrap:wrap;">
+        <a class="btn" href="{{ url_for('login') }}">Kirjaudu</a>
+        <a class="btn" href="{{ url_for('register') }}">Rekisteröidy</a>
+    </div>
+</div>
+{% endblock %}

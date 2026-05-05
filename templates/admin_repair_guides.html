@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Ohjepankki{% endblock %}
+
+{% block extra_css %}
+<style>
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 18px 40px; }
+    .top h1 { color: white; margin: 0; }
+    .top-subtitle { color: #cbd5e1; margin-top: 6px; margin-bottom: 24px; }
+    .panel { background: white; color: #0f172a; border-radius: 24px; padding: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.25); }
+    .success { margin-bottom: 16px; padding: 12px 14px; border-radius: 14px; background: #dcfce7; color: #166534; font-weight: 700; }
+    .make-group { border: 1px solid #e2e8f0; border-radius: 18px; background: #f8fafc; overflow: hidden; margin-bottom: 14px; }
+    .make-summary { cursor: pointer; padding: 16px 18px; font-weight: 900; display: flex; justify-content: space-between; background: #fff; }
+    .make-summary::-webkit-details-marker { display: none; }
+    .guide-list { display: grid; gap: 12px; padding: 14px; }
+    .guide-card { background: white; border: 1px solid #dbeafe; border-radius: 16px; padding: 16px; }
+    .guide-title { font-size: 18px; font-weight: 900; }
+    .muted { color: #64748b; line-height: 1.5; }
+    .section { margin-top: 14px; }
+    .pill-row { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 8px; }
+    .pill { background: #dbeafe; color: #1d4ed8; padding: 7px 11px; border-radius: 999px; font-weight: 700; font-size: 13px; }
+    .btn { display: inline-flex; margin-top: 14px; padding: 10px 14px; border-radius: 12px; text-decoration: none; font-weight: 700; background: #2563eb; color: white; }
+    .empty { border: 2px dashed #cbd5e1; border-radius: 18px; padding: 24px; text-align: center; color: #64748b; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wrap">
+    <div class="top">
+        <h1>Ohjepankki</h1>
+        <div class="top-subtitle">Korjausohjeet merkeittäin</div>
+    </div>
+
+    <div class="panel">
+        {% if success %}
+            <div class="success">{{ success }}</div>
+        {% endif %}
+
+        {% if grouped_items %}
+            {% for make, guides in grouped_items.items() %}
+                <details class="make-group" {% if loop.first %}open{% endif %}>
+                    <summary class="make-summary">
+                        <span>{{ make }}</span>
+                        <span>{{ guides|length }} kpl</span>
+                    </summary>
+
+                    <div class="guide-list">
+                        {% for item in guides %}
+                            <div class="guide-card">
+                                <div class="guide-title">
+                                    {{ item.part_name }}
+                                    {% if item.title %} – {{ item.title }}{% endif %}
+                                </div>
+
+                                {% if item.vin_prefix %}
+                                    <div class="muted section"><strong>VIN prefix:</strong> {{ item.vin_prefix }}</div>
+                                {% endif %}
+
+                                <div class="section">
+                                    <strong>Työvaiheet:</strong>
+                                    <ol>
+                                        {% for step in item.steps_parsed %}
+                                            <li>{{ step.text if step.text is defined else step }}</li>
+                                        {% endfor %}
+                                    </ol>
+                                </div>
+
+                                {% if item.tools_parsed %}
+                                    <div class="section">
+                                        <strong>Työkalut:</strong>
+                                        <div class="pill-row">
+                                            {% for tool in item.tools_parsed %}
+                                                <span class="pill">{{ tool }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                                {% if item.notes_parsed %}
+                                    <div class="section">
+                                        <strong>Huomiot:</strong>
+                                        <ul>
+                                            {% for note in item.notes_parsed %}
+                                                <li>⚠️ {{ note }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                {% endif %}
+
+                                <a class="btn" href="{{ url_for('admin_repair_guides.admin_edit_repair_guide', guide_id=item.id) }}">
+                                    Muokkaa ohjetta
+                                </a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </details>
+            {% endfor %}
+        {% else %}
+            <div class="empty">Ohjepankissa ei ole vielä ohjeita.</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

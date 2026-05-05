@@ -1,0 +1,305 @@
+{% extends "base.html" %}
+
+{% block title %}Tilaus vaaditaan{% endblock %}
+
+{% block extra_css %}
+<style>
+    .wrap {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 24px 18px 40px;
+    }
+
+    .hero {
+        color: white;
+        margin-bottom: 24px;
+    }
+
+    .hero h1 {
+        margin: 0 0 10px;
+        font-size: 34px;
+    }
+
+    .hero p {
+        margin: 0;
+        color: #cbd5e1;
+        line-height: 1.6;
+        max-width: 760px;
+    }
+
+    .success {
+        margin-bottom: 16px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        background: #dcfce7;
+        color: #166534;
+        font-weight: 700;
+    }
+
+    .layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+    }
+
+    .panel {
+        background: white;
+        color: #0f172a;
+        border-radius: 22px;
+        padding: 22px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    }
+
+    .panel h2 {
+        margin-top: 0;
+        margin-bottom: 8px;
+    }
+
+    .muted {
+        color: #64748b;
+        line-height: 1.5;
+    }
+
+    .status-box {
+        margin-top: 18px;
+        padding: 14px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+    }
+
+    .cards {
+        display: grid;
+        gap: 14px;
+        margin-top: 14px;
+    }
+
+    .product-card {
+        border: 1px solid #dbeafe;
+        background: #f8fafc;
+        border-radius: 18px;
+        padding: 16px;
+    }
+
+    .product-title {
+        font-size: 18px;
+        font-weight: 800;
+        color: #0f172a;
+    }
+
+    .product-price {
+        margin-top: 8px;
+        font-size: 15px;
+        font-weight: 700;
+        color: #1d4ed8;
+    }
+
+    .product-desc {
+        margin-top: 10px;
+        color: #475569;
+        line-height: 1.5;
+    }
+
+    .coming-soon {
+        display: inline-block;
+        margin-top: 12px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: #fef3c7;
+        color: #92400e;
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+    .form-note {
+        margin-top: 12px;
+    }
+
+    .form-note textarea,
+    .form-note input {
+        width: 100%;
+        box-sizing: border-box;
+        margin-top: 8px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        border: 1px solid #cbd5e1;
+        background: white;
+        font-size: 14px;
+    }
+
+    .form-note textarea {
+        min-height: 70px;
+        resize: vertical;
+    }
+
+    .btn {
+        display: inline-block;
+        border: none;
+        margin-top: 12px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        background: #2563eb;
+        color: white;
+        font-weight: 800;
+        cursor: pointer;
+        width: 100%;
+    }
+
+    .btn-secondary {
+        background: #0f172a;
+    }
+
+    .history-list {
+        display: grid;
+        gap: 10px;
+        margin-top: 14px;
+    }
+
+    .history-item {
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        border-radius: 14px;
+        padding: 12px;
+    }
+
+    .history-item-title {
+        font-weight: 800;
+        color: #0f172a;
+    }
+
+    .history-item-meta {
+        margin-top: 6px;
+        color: #64748b;
+        font-size: 14px;
+    }
+
+    @media (max-width: 900px) {
+        .layout {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wrap">
+    <div class="hero">
+        <h1>Tilaus ei ole aktiivinen</h1>
+        <p>
+            Basic-käyttäjä tarvitsee aktiivisen kuukausitilauksen perusjärjestelmään.
+        </p>
+    </div>
+
+    {% if success %}
+        <div class="success">{{ success }}</div>
+    {% endif %}
+
+    <div class="layout">
+        <div class="panel">
+            <h2>Tilin tila</h2>
+            <div class="muted">
+                Alla näkyy nykyinen tilasi järjestelmässä.
+            </div>
+
+            <div class="status-box">
+                <div><strong>Sähköposti:</strong> {{ current_user.email }}</div>
+                <div style="margin-top:8px;"><strong>Tyyppi:</strong> {{ current_user.account_type or 'basic' }}</div>
+                <div style="margin-top:8px;"><strong>Tilaus:</strong> {{ current_user.subscription_status or 'inactive' }}</div>
+            </div>
+
+            <form method="GET" action="{{ url_for('logout') }}">
+                <button class="btn btn-secondary" type="submit">Kirjaudu ulos</button>
+            </form>
+        </div>
+
+        <div class="panel">
+            <h2>Maksut ja lisäpalvelut</h2>
+            <div class="muted">
+                Päivitämme palvelua
+            </div>
+
+            <div class="cards">
+                <div class="product-card">
+                    <div class="product-title">Basic kuukausitilaus</div>
+                    <div class="product-price">Hinta: määritetään myöhemmin</div>
+                    <div class="product-desc">
+                        Perusjärjestelmän käyttöoikeus selain- ja appiversioon.
+                    </div>
+                    <div class="coming-soon">Tulossa pian</div>
+
+                    <form method="POST" action="{{ url_for('payment_coming_soon') }}">
+                        <input type="hidden" name="product_type" value="basic_subscription">
+                        <input type="hidden" name="product_key" value="basic_monthly">
+                        <div class="form-note">
+                            <input type="text" name="note" placeholder="Halutessasi oma kommentti tai kiinnostuksen lisätieto">
+                        </div>
+                        <button class="btn" type="submit">Haluan Basic-tilauksen</button>
+                    </form>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-title">Komponentin vaihto-ohje</div>
+                    <div class="product-price">Yksittäisosto myöhemmin</div>
+                    <div class="product-desc">
+                        Tuleva lisäpalvelu. Tarkat vaihto-ohjeet tiettyyn osaan tai korjaukseen.
+                    </div>
+                    <div class="coming-soon">Ei vielä käytössä</div>
+
+                    <form method="POST" action="{{ url_for('payment_coming_soon') }}">
+                        <input type="hidden" name="product_type" value="component_guide">
+                        <input type="hidden" name="product_key" value="generic_component_guide">
+                        <div class="form-note">
+                            <textarea name="note" placeholder="Kirjoita esimerkiksi mitä komponenttia tai automallia koskeva ohje kiinnostaa"></textarea>
+                        </div>
+                        <button class="btn" type="submit">Haluan komponentin vaihto-ohjeen</button>
+                    </form>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-title">Kytkentäkaavio</div>
+                    <div class="product-price">Yksittäisosto myöhemmin</div>
+                    <div class="product-desc">
+                        Tuleva lisäpalvelu sähkövikojen hakuun ja mittauksiin.
+                    </div>
+                    <div class="coming-soon">Ei vielä käytössä</div>
+
+                    <form method="POST" action="{{ url_for('payment_coming_soon') }}">
+                        <input type="hidden" name="product_type" value="wiring_diagram">
+                        <input type="hidden" name="product_key" value="generic_wiring_diagram">
+                        <div class="form-note">
+                            <textarea name="note" placeholder="Kirjoita esimerkiksi merkki, malli, vuosimalli tai järjestelmä josta haluaisit kaavion"></textarea>
+                        </div>
+                        <button class="btn" type="submit">Haluan kytkentäkaavion</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel" style="margin-top:18px;">
+        <h2>tähän tulee mainos</h2>
+        <div class="muted">
+            Mainoksen paikka
+        </div>
+
+        {% if interest_items %}
+            <div class="history-list">
+                {% for item in interest_items %}
+                    <div class="history-item">
+                        <div class="history-item-title">{{ item.product_type }}</div>
+                        <div class="history-item-meta">
+                            {% if item.product_key %}<div><strong>Avain:</strong> {{ item.product_key }}</div>{% endif %}
+                            {% if item.note %}<div><strong>Huomio:</strong> {{ item.note }}</div>{% endif %}
+                            <div><strong>Luotu:</strong> {{ item.created_at }}</div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div style="margin-top:14px;" class="muted">
+                Ei vielä tallennettuja kiinnostuksia.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

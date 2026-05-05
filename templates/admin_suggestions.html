@@ -1,0 +1,323 @@
+{% extends "base.html" %}
+
+{% block title %}Ehdotetut päivitykset{% endblock %}
+
+{% block extra_css %}
+<style>
+    .wrap {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 24px 18px 40px;
+    }
+
+    .top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+    }
+
+    .top h1 {
+        color: white;
+        margin: 0;
+    }
+
+    .top-subtitle {
+        color: #cbd5e1;
+        margin-top: 6px;
+    }
+
+    .panel {
+        background: white;
+        color: #0f172a;
+        border-radius: 24px;
+        padding: 24px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    }
+
+    .toolbar {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 18px;
+    }
+
+    .toolbar a {
+        text-decoration: none;
+        padding: 10px 14px;
+        border-radius: 12px;
+        background: #e2e8f0;
+        color: #334155;
+        font-weight: 700;
+    }
+
+    .toolbar a.active {
+        background: #2563eb;
+        color: white;
+    }
+
+    .success {
+        margin-bottom: 14px;
+        background: #dcfce7;
+        color: #166534;
+        border: 1px solid #86efac;
+        border-radius: 14px;
+        padding: 12px 14px;
+        font-weight: 700;
+    }
+
+    .items {
+        display: grid;
+        gap: 14px;
+    }
+
+    .item {
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        border-radius: 18px;
+        padding: 16px;
+    }
+
+    .row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 7px 11px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 800;
+    }
+
+    .badge-pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .badge-approved {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .badge-rejected {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .meta {
+        color: #64748b;
+        line-height: 1.6;
+        margin-top: 10px;
+    }
+
+    .payload-box {
+        margin-top: 12px;
+        padding: 12px;
+        background: white;
+        border: 1px solid #dbeafe;
+        border-radius: 12px;
+    }
+
+    .payload-title {
+        font-weight: 800;
+        margin-bottom: 8px;
+    }
+
+    .actions {
+        margin-top: 14px;
+        display: grid;
+        gap: 10px;
+    }
+
+    .actions form {
+        margin: 0;
+    }
+
+    .actions textarea {
+        width: 100%;
+        box-sizing: border-box;
+        min-height: 70px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid #cbd5e1;
+        font-size: 14px;
+        resize: vertical;
+    }
+
+    .button-row {
+        display: flex;
+        gap: 10px;
+        margin-top: 8px;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        border: none;
+        padding: 11px 14px;
+        border-radius: 12px;
+        font-weight: 800;
+        cursor: pointer;
+        color: white;
+    }
+
+    .btn-approve {
+        background: #16a34a;
+    }
+
+    .btn-reject {
+        background: #dc2626;
+    }
+
+    .empty {
+        border: 2px dashed #cbd5e1;
+        border-radius: 18px;
+        padding: 24px;
+        text-align: center;
+        color: #64748b;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wrap">
+    <div class="top">
+        <div>
+            <h1>Ehdotetut päivitykset</h1>
+            <div class="top-subtitle">Automaattisesti kerätyt ehdotukset vikakooditietojen kehittämiseen</div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="toolbar">
+            <a href="{{ url_for('admin.admin_suggestions', status='pending') }}" class="{% if status == 'pending' %}active{% endif %}">Odottavat</a>
+            <a href="{{ url_for('admin.admin_suggestions', status='approved') }}" class="{% if status == 'approved' %}active{% endif %}">Hyväksytyt</a>
+            <a href="{{ url_for('admin.admin_suggestions', status='rejected') }}" class="{% if status == 'rejected' %}active{% endif %}">Hylätyt</a>
+        </div>
+
+        {% if success %}
+            <div class="success">{{ success }}</div>
+        {% endif %}
+
+        {% if items %}
+            <div class="items">
+                {% for item in items %}
+                    <div class="item">
+                        <div class="row">
+                            <div>
+                                <strong>{{ item.fault_code }}</strong>
+                                — {{ item.fault_title }}
+                            </div>
+
+                            <div>
+                                {% if item.status == 'pending' %}
+                                    <span class="badge badge-pending">Odottaa</span>
+                                {% elif item.status == 'approved' %}
+                                    <span class="badge badge-approved">Hyväksytty</span>
+                                {% else %}
+                                    <span class="badge badge-rejected">Hylätty</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="meta">
+                            <div><strong>Tyyppi:</strong> {{ item.suggestion_type }}</div>
+                            <div><strong>Luotu:</strong> {{ item.created_at }}</div>
+
+                            {% if item.diagnosis_id %}
+                                <div><strong>Lähdetiketti:</strong> #{{ item.diagnosis_id }}</div>
+                            {% endif %}
+
+                            {% if item.diagnosis_make or item.diagnosis_model or item.diagnosis_engine %}
+                                <div><strong>Ajoneuvo:</strong> {{ item.diagnosis_make }} {{ item.diagnosis_model }} {{ item.diagnosis_engine }}</div>
+                            {% endif %}
+
+                            {% if item.source_summary %}
+                                <div><strong>Yhteenveto:</strong> {{ item.source_summary }}</div>
+                            {% endif %}
+                        </div>
+
+                        {% if item.diagnosis_symptoms %}
+                            <div class="payload-box">
+                                <div class="payload-title">Tiketin oireet</div>
+                                <div>{{ item.diagnosis_symptoms }}</div>
+                            </div>
+                        {% endif %}
+
+                        {% if item.diagnosis_final_cause or item.diagnosis_final_fix %}
+                            <div class="payload-box">
+                                <div class="payload-title">Tiketin ratkaisu</div>
+                                {% if item.diagnosis_final_cause %}
+                                    <div><strong>Lopullinen syy:</strong> {{ item.diagnosis_final_cause }}</div>
+                                {% endif %}
+                                {% if item.diagnosis_final_fix %}
+                                    <div><strong>Korjaus:</strong> {{ item.diagnosis_final_fix }}</div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+
+                        <div class="payload-box">
+                            <div class="payload-title">Ehdotettu lisäys</div>
+
+                            {% if item.suggestion_type == 'possible_cause' %}
+                                <div><strong>Mahdollinen syy:</strong> {{ item.payload.cause_name }}</div>
+                                <div style="margin-top:6px;">{{ item.payload.cause_description }}</div>
+                            {% elif item.suggestion_type == 'symptom_match' %}
+                                <div><strong>Uusi oireavainsana:</strong> {{ item.payload.keyword }}</div>
+                                <div style="margin-top:6px;">{{ item.payload.note }}</div>
+                            {% elif item.suggestion_type == 'vehicle_rule' %}
+                                <div><strong>Merkki:</strong> {{ item.payload.make }}</div>
+                                <div><strong>Malli:</strong> {{ item.payload.model }}</div>
+                                <div><strong>Moottori:</strong> {{ item.payload.engine }}</div>
+                                <div style="margin-top:6px;"><strong>Sääntö:</strong> {{ item.payload.rule_note }}</div>
+                                <div style="margin-top:6px;"><strong>Boost:</strong> {{ item.payload.extra_probability_boost }}</div>
+                            {% else %}
+                                <pre>{{ item.payload }}</pre>
+                            {% endif %}
+                        </div>
+
+                        {% if item.status == 'pending' %}
+                            <div class="actions">
+                                <form method="POST" action="{{ url_for('admin.approve_suggestion_route', suggestion_id=item.id) }}">
+                                    <textarea name="admin_note" placeholder="Adminin huomio (valinnainen)"></textarea>
+                                    <div class="button-row">
+                                        <button class="btn btn-approve" type="submit">Hyväksy ehdotus</button>
+                                    </div>
+                                </form>
+
+                                <form method="POST" action="{{ url_for('admin.reject_suggestion_route', suggestion_id=item.id) }}">
+                                    <textarea name="admin_note" placeholder="Miksi hylättiin? (valinnainen)"></textarea>
+                                    <div class="button-row">
+                                        <button class="btn btn-reject" type="submit">Hylkää ehdotus</button>
+                                    </div>
+                                </form>
+                            </div>
+                        {% else %}
+                            <div class="meta" style="margin-top:12px;">
+                                {% if item.reviewed_by_email %}
+                                    <div><strong>Käsittelijä:</strong> {{ item.reviewed_by_email }}</div>
+                                {% endif %}
+                                {% if item.reviewed_at %}
+                                    <div><strong>Käsitelty:</strong> {{ item.reviewed_at }}</div>
+                                {% endif %}
+                                {% if item.admin_note %}
+                                    <div><strong>Adminin huomio:</strong> {{ item.admin_note }}</div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty">
+                Tämän tilan ehdotuksia ei löytynyt.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

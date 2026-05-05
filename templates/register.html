@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Rekisteröidy{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+    <h1 class="auth-title">Rekisteröidy</h1>
+
+    <div class="auth-card">
+        <form method="POST">
+
+            <!-- PERUSTIEDOT -->
+            <h3>Perustiedot</h3>
+
+            <input name="full_name" placeholder="Koko nimi" required value="{{ full_name or '' }}">
+            <input name="phone" placeholder="Puhelin" required value="{{ phone or '' }}">
+            <input name="email" type="email" placeholder="Sähköposti" required value="{{ email or '' }}">
+            <input name="password" type="password" placeholder="Salasana" required>
+            <input name="password2" type="password" placeholder="Vahvista salasana" required>
+
+            <!-- OSOITE -->
+            <h3>Osoite</h3>
+
+            <input name="address_line1" placeholder="Lähiosoite" required value="{{ address_line1 or '' }}">
+            <input name="postal_code" placeholder="Postinumero" required value="{{ postal_code or '' }}">
+            <input name="city" placeholder="Kaupunki" required value="{{ city or '' }}">
+            <input name="country" placeholder="Maa" required value="{{ country or 'Suomi' }}">
+
+            <!-- LASKUTUS -->
+            <h3>Laskutus</h3>
+
+            <select name="customer_type" id="customer_type" onchange="toggleCompany()">
+                <option value="private" {% if (customer_type or 'private') == 'private' %}selected{% endif %}>Yksityinen</option>
+                <option value="company" {% if customer_type == 'company' %}selected{% endif %}>Yritys</option>
+            </select>
+
+            <div id="companyBox" style="display:none;">
+                <input name="company_name" placeholder="Yrityksen nimi" value="{{ company_name or '' }}">
+                <input name="vat_number" placeholder="ALV / Y-tunnus" value="{{ vat_number or '' }}">
+            </div>
+
+            <label>
+                <input type="checkbox" name="accept_privacy" value="yes" required {% if accept_privacy %}checked{% endif %}>
+                Hyväksyn <a href="{{ url_for('privacy') }}">tietosuojaselosteen</a>
+            </label>
+
+            <button type="submit">Luo tili</button>
+
+        </form>
+
+        {% if error %}
+            <p style="color:red;">{{ error }}</p>
+        {% endif %}
+
+        {% if success %}
+            <p style="color:green;">{{ success }}</p>
+        {% endif %}
+
+        <p><a href="{{ url_for('login') }}">Kirjaudu</a></p>
+    </div>
+</div>
+
+<script>
+function toggleCompany() {
+    const type = document.getElementById("customer_type").value;
+    document.getElementById("companyBox").style.display = type === "company" ? "block" : "none";
+}
+toggleCompany();
+</script>
+{% endblock %}

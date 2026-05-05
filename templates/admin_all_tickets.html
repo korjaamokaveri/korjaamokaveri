@@ -1,0 +1,339 @@
+{% extends "base.html" %}
+
+{% block title %}Kaikki tiketit{% endblock %}
+
+{% block extra_css %}
+<style>
+    .wrap {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 24px 18px 40px;
+    }
+
+    .top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+    }
+
+    .top h1 {
+        color: white;
+        margin: 0;
+    }
+
+    .top-subtitle {
+        color: #cbd5e1;
+        margin-top: 6px;
+    }
+
+    .panel {
+        background: white;
+        color: #0f172a;
+        border-radius: 24px;
+        padding: 24px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    }
+
+    .filters {
+        display: grid;
+        grid-template-columns: 1fr 220px 180px;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .filters input,
+    .filters select,
+    .filters button,
+    .filters a {
+        box-sizing: border-box;
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid #cbd5e1;
+        font-size: 14px;
+    }
+
+    .filters button {
+        background: #2563eb;
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-weight: 700;
+    }
+
+    .clear-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        background: #f8fafc;
+        color: #334155;
+        font-weight: 700;
+    }
+
+    .ticket-list {
+        display: grid;
+        gap: 14px;
+    }
+
+    .ticket {
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        border-radius: 18px;
+        padding: 16px;
+        border-left: 6px solid #cbd5e1;
+    }
+
+    .ticket-open {
+        border-left-color: #f59e0b;
+    }
+
+    .ticket-closed {
+        border-left-color: #16a34a;
+    }
+
+    .ticket-unknown {
+        border-left-color: #dc2626;
+    }
+
+    .row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .code {
+        font-size: 20px;
+        font-weight: 800;
+    }
+
+    .muted {
+        color: #64748b;
+    }
+
+    .badge {
+        display: inline-block;
+        margin-top: 8px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .badge-open {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .badge-closed {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .badge-unknown {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .empty {
+        border: 2px dashed #cbd5e1;
+        border-radius: 18px;
+        padding: 24px;
+        text-align: center;
+        color: #64748b;
+    }
+
+    .solution-box {
+        margin-top: 12px;
+        padding: 12px;
+        background: #ecfdf5;
+        border: 1px solid #bbf7d0;
+        border-radius: 12px;
+    }
+
+    .stats-row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 12px;
+    }
+
+    .stat {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 800;
+    }
+
+    .stat-like {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .stat-dislike {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .stat-total {
+        background: #e2e8f0;
+        color: #334155;
+    }
+
+    .actions {
+        margin-top: 14px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .action-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 14px;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 700;
+        background: #2563eb;
+        color: white;
+    }
+
+    .action-link-secondary {
+        background: #0f172a;
+    }
+
+    @media (max-width: 880px) {
+        .filters {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wrap">
+    <div class="top">
+        <div>
+            <h1>Kaikki tiketit</h1>
+            <div class="top-subtitle">Adminin koko tikettiloki</div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <form method="GET" action="{{ url_for('admin.admin_all_tickets') }}" class="filters">
+            <input
+                type="text"
+                name="q"
+                placeholder="Hae vikakoodi, käyttäjä, auto, oire tai ratkaisu..."
+                value="{{ q or '' }}"
+            >
+
+            <select name="status">
+                <option value="" {% if not status %}selected{% endif %}>Kaikki tilat</option>
+                <option value="open" {% if status == 'open' %}selected{% endif %}>Avoimet</option>
+                <option value="closed" {% if status == 'closed' %}selected{% endif %}>Suljetut</option>
+                <option value="unknown" {% if status == 'unknown' %}selected{% endif %}>Tuntemattomat</option>
+            </select>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                <button type="submit">Hae</button>
+                <a class="clear-link" href="{{ url_for('admin.admin_all_tickets') }}">Tyhjennä</a>
+            </div>
+        </form>
+
+        {% if tickets %}
+            <div class="ticket-list">
+                {% for item in tickets %}
+                    <div class="ticket {% if item.status == 'unknown' %}ticket-unknown{% elif item.status == 'closed' %}ticket-closed{% else %}ticket-open{% endif %}">
+                        <div class="row">
+                            <div class="code">{{ item.code }}</div>
+                            <div class="muted">{{ item.created_at }}</div>
+                        </div>
+
+                        <div style="margin-top:8px;">
+                            <strong>Käyttäjä:</strong> {{ item.user_email }}
+                        </div>
+
+                        <div style="margin-top:6px;">
+                            <strong>Ajoneuvo:</strong> {{ item.make }} {{ item.model }} {{ item.engine }}
+                        </div>
+
+                        <div class="muted" style="margin-top:6px;">
+                            <strong>Oireet:</strong> {{ item.symptoms or 'Ei kuvattu' }}
+                        </div>
+
+                        <div style="margin-top:10px;">
+                            {% if item.status == 'closed' %}
+                                <span class="badge badge-closed">Suljettu</span>
+                            {% elif item.status == 'unknown' %}
+                                <span class="badge badge-unknown">Tuntematon vikakoodi</span>
+                            {% else %}
+                                <span class="badge badge-open">Avoin</span>
+                            {% endif %}
+                        </div>
+
+                        {% if item.title %}
+                            <div style="margin-top:10px;">
+                                <strong>{{ item.title }}</strong>
+                            </div>
+                            <div class="muted">{{ item.description }}</div>
+                        {% endif %}
+
+                        <div class="stats-row">
+                            <div class="stat stat-like">👍 {{ item.likes or 0 }}</div>
+                            <div class="stat stat-dislike">👎 {{ item.dislikes or 0 }}</div>
+                            <div class="stat stat-total">Yhteensä {{ item.total_votes or 0 }}</div>
+                        </div>
+
+                        {% if item.resolved %}
+                            <div class="solution-box">
+                                <strong>Vastaus / ratkaisu:</strong><br>
+                                {{ item.final_cause }} – {{ item.final_fix }}
+
+                                {% if item.feedback_notes %}
+                                    <div style="margin-top:6px; color:#475569;">
+                                        {{ item.feedback_notes }}
+                                    </div>
+                                {% endif %}
+
+                                {% if item.resolution_image_path %}
+                                    <div style="margin-top:12px;">
+                                        <strong>Korjauskuva:</strong>
+                                        <div style="margin-top:8px;">
+                                            <img
+                                                src="{{ url_for('static', filename=item.resolution_image_path) }}"
+                                                alt="Korjauskuva"
+                                                style="max-width:100%; width:420px; border-radius:12px; border:1px solid #cbd5e1;"
+                                            >
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+
+                        <div class="actions">
+                            <a class="action-link" href="{{ url_for('admin.admin_ticket_detail', diagnosis_id=item.id) }}">Avaa tiketti</a>
+
+                            {% if item.unknown_code %}
+                                <a class="action-link action-link-secondary" href="{{ url_for('admin.create_from_ticket', diagnosis_id=item.id) }}">Luo DTC tiketistä</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty">
+                Tikettejä ei löytynyt annetuilla hakuehdoilla.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

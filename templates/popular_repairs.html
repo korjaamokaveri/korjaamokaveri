@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block title %}Suosituimmat korjausehdotukset{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --bg-1: #0f172a;
+        --bg-2: #1e293b;
+        --card: #ffffff;
+        --muted: #64748b;
+        --text: #0f172a;
+        --line: #e2e8f0;
+        --primary: #2563eb;
+        --shadow: 0 20px 60px rgba(0, 0, 0, 0.22);
+        --success-bg: #dcfce7;
+        --success-text: #166534;
+        --danger-bg: #fee2e2;
+        --danger-text: #991b1b;
+    }
+
+    body {
+        background:
+            radial-gradient(circle at top left, rgba(37,99,235,0.22), transparent 30%),
+            linear-gradient(180deg, var(--bg-1), var(--bg-2));
+        color: var(--text);
+    }
+
+    .page-wrap {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 26px 18px 48px;
+    }
+
+    .hero {
+        color: white;
+        margin-bottom: 24px;
+    }
+
+    .hero h1 {
+        margin: 0 0 10px;
+        font-size: 38px;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+    }
+
+    .hero p {
+        margin: 0;
+        color: #cbd5e1;
+        font-size: 17px;
+        line-height: 1.6;
+        max-width: 760px;
+    }
+
+    .hero-actions {
+        margin-top: 18px;
+    }
+
+    .hero-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 16px;
+        border-radius: 14px;
+        background: rgba(255,255,255,0.1);
+        color: white;
+        text-decoration: none;
+        font-weight: 700;
+        border: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .hero-link:hover {
+        background: rgba(255,255,255,0.16);
+    }
+
+    .list {
+        display: grid;
+        gap: 14px;
+    }
+
+    .card {
+        background: var(--card);
+        border-radius: 22px;
+        box-shadow: var(--shadow);
+        border: 1px solid rgba(255,255,255,0.15);
+        padding: 20px;
+    }
+
+    .top-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 10px;
+    }
+
+    .fault-code {
+        display: inline-block;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: #dbeafe;
+        color: #1d4ed8;
+        font-size: 13px;
+        font-weight: 800;
+    }
+
+    .title {
+        margin: 0;
+        font-size: 22px;
+        color: #0f172a;
+    }
+
+    .description {
+        margin-top: 10px;
+        color: var(--muted);
+        line-height: 1.6;
+        font-size: 15px;
+    }
+
+    .stats {
+        margin-top: 16px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .stat {
+        padding: 10px 14px;
+        border-radius: 999px;
+        font-size: 14px;
+        font-weight: 800;
+    }
+
+    .like {
+        background: var(--success-bg);
+        color: var(--success-text);
+    }
+
+    .dislike {
+        background: var(--danger-bg);
+        color: var(--danger-text);
+    }
+
+    .total {
+        background: #f8fafc;
+        color: #334155;
+        border: 1px solid var(--line);
+    }
+
+    .empty {
+        background: white;
+        border-radius: 22px;
+        box-shadow: var(--shadow);
+        padding: 26px;
+        color: var(--muted);
+        text-align: center;
+    }
+
+    @media (max-width: 640px) {
+        .hero h1 { font-size: 30px; }
+        .top-row { flex-direction: column; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrap">
+    <div class="hero">
+        <h1>Suosituimmat korjausehdotukset</h1>
+        <p>
+            Täällä näkyvät käyttäjien palautteen perusteella hyödyllisimmiksi arvioidut
+            korjausehdotukset eri vikakoodeille.
+        </p>
+
+        <div class="hero-actions">
+            <a class="hero-link" href="{{ url_for('app_home') }}">← Palaa etusivulle</a>
+        </div>
+    </div>
+
+    {% if items and items|length > 0 %}
+        <div class="list">
+            {% for item in items %}
+                <div class="card">
+                    <div class="top-row">
+                        <div>
+                            <div class="fault-code">{{ item.fault_code }}</div>
+                            <h2 class="title" style="margin-top:10px;">
+                                {{ item.title if item.title else "Korjausehdotus ilman otsikkoa" }}
+                            </h2>
+                        </div>
+                    </div>
+
+                    <div class="description">
+                        {{ item.description if item.description else "Kuvaus puuttuu." }}
+                    </div>
+
+                    <div class="stats">
+                        <div class="stat like">👍 {{ item.likes or 0 }}</div>
+                        <div class="stat dislike">👎 {{ item.dislikes or 0 }}</div>
+                        <div class="stat total">Yhteensä {{ item.total_votes or 0 }} palautetta</div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty">
+            Suosituimpia korjausehdotuksia ei ole vielä kertynyt tarpeeksi näytettäväksi.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Kirjauduttu ulos{% endblock %}
+
+{% block extra_head %}
+<meta http-equiv="refresh" content="3;url={{ url_for('login') }}">
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-wrap {
+        max-width: 520px;
+        margin: 40px auto 0;
+        text-align: center;
+    }
+
+    .auth-title {
+        color: white;
+        margin-bottom: 20px;
+        font-size: 32px;
+        font-weight: 800;
+    }
+
+    .auth-card {
+        background: white;
+        border-radius: 24px;
+        padding: 28px 24px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    }
+
+    .icon {
+        font-size: 48px;
+        margin-bottom: 12px;
+    }
+
+    .muted {
+        color: #64748b;
+        margin-bottom: 18px;
+    }
+
+    .countdown {
+        font-size: 13px;
+        color: #94a3b8;
+        margin-top: 12px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+    <h1 class="auth-title">Kirjauduttu ulos</h1>
+
+    <div class="auth-card">
+        <div class="icon">👋</div>
+
+        <p class="muted">
+            Olet kirjautunut ulos onnistuneesti.
+        </p>
+
+        <a class="btn" href="{{ url_for('login') }}">
+            Kirjaudu uudelleen
+        </a>
+
+        <div class="countdown">
+            Sinut ohjataan automaattisesti kirjautumissivulle...
+        </div>
+    </div>
+</div>
+{% endblock %}

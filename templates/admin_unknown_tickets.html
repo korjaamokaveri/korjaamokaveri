@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block title %}Tuntemattomat vikakoodit{% endblock %}
+
+{% block extra_css %}
+<style>
+    .wrap {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 24px 18px 40px;
+    }
+
+    .top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+    }
+
+    .top h1 {
+        color: white;
+        margin: 0;
+    }
+
+    .top-subtitle {
+        color: #cbd5e1;
+        margin-top: 6px;
+    }
+
+    .panel {
+        background: white;
+        color: #0f172a;
+        border-radius: 24px;
+        padding: 24px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    }
+
+    .ticket-list {
+        display: grid;
+        gap: 14px;
+    }
+
+    .ticket {
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        border-radius: 18px;
+        padding: 16px;
+    }
+
+    .code {
+        font-size: 20px;
+        font-weight: 800;
+        color: #b91c1c;
+    }
+
+    .muted {
+        color: #64748b;
+    }
+
+    .empty {
+        border: 2px dashed #cbd5e1;
+        border-radius: 18px;
+        padding: 24px;
+        text-align: center;
+        color: #64748b;
+    }
+
+    textarea, input, button {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px 12px;
+        margin-top: 8px;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        font-size: 14px;
+    }
+
+    button {
+        background: #2563eb;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+
+    .success {
+        margin-top: 16px;
+        padding: 12px 14px;
+        background: #dcfce7;
+        border: 1px solid #86efac;
+        color: #166534;
+        border-radius: 12px;
+        font-weight: 600;
+    }
+
+    .badge {
+        display: inline-block;
+        margin-top: 8px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: #fee2e2;
+        color: #991b1b;
+        font-size: 13px;
+        font-weight: 700;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wrap">
+    <div class="top">
+        <div>
+            <h1>Tuntemattomat vikakoodit</h1>
+            <div class="top-subtitle">Tiketti vaatii manuaalisen vastauksen</div>
+        </div>
+    </div>
+
+    <div class="panel">
+        {% if success %}
+            <div class="success">{{ success }}</div>
+        {% endif %}
+
+        {% if tickets %}
+            <div class="ticket-list">
+                {% for item in tickets %}
+                    <div class="ticket">
+                        <div class="code">{{ item.code }}</div>
+                        <div class="badge">Tuntematon vikakoodi</div>
+                        <div class="muted" style="margin-top:8px;">{{ item.created_at }}</div>
+
+                        <div style="margin-top:8px;">
+                            <strong>{{ item.make }} {{ item.model }} {{ item.engine }}</strong>
+                        </div>
+
+                        <div class="muted" style="margin-top:6px;">
+                            Oireet: {{ item.symptoms or 'Ei kuvattu' }}
+                        </div>
+
+                        {% if item.initial_image_path %}
+                            <div style="margin-top:12px;">
+                                <strong>Käyttäjän lähettämä alkuperäinen kuva:</strong>
+                                <div style="margin-top:8px;">
+                                    <img
+                                        src="{{ url_for('static', filename=item.initial_image_path) }}"
+                                        alt="Alkuperäinen kuva"
+                                        style="max-width:100%; width:320px; border-radius:12px; border:1px solid #cbd5e1;"
+                                    >
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <form method="GET"
+                              action="{{ url_for('admin.create_from_ticket', diagnosis_id=item.id) }}"
+                              style="margin-top:12px;">
+                            <button type="submit" style="background:#16a34a; color:white; border:none; padding:10px 12px; border-radius:10px; cursor:pointer;">
+                                Luo vikakoodi tästä
+                            </button>
+                        </form>
+
+                        <form method="POST"
+                              action="{{ url_for('admin.admin_answer_ticket', diagnosis_id=item.id) }}"
+                              enctype="multipart/form-data"
+                              style="margin-top:12px;">
+                            <input type="text" name="final_cause" placeholder="Arvioitu lopullinen syy" required>
+                            <input type="text" name="final_fix" placeholder="Vastaus / korjausehdotus käyttäjälle" required>
+                            <textarea name="notes" placeholder="Adminin lisähuomiot"></textarea>
+
+                            <label style="display:flex; gap:10px; align-items:flex-start; margin-top:10px;">
+                                <input type="checkbox" name="create_fault_code" value="yes" style="width:auto; margin-top:3px;">
+                                <span>Tallenna samalla uutena vikakoodina tietokantaan</span>
+                            </label>
+
+                            <input type="text" name="new_title" placeholder="Uuden vikakoodin otsikko, esim. Katalysaattorin tehon alhaisuus">
+                            <textarea name="new_description" placeholder="Uuden vikakoodin kuvaus"></textarea>
+
+                            <label style="display:block; margin-top:12px; font-weight:600;">Lisää ratkaisuun kuva</label>
+                            <input type="file" name="resolution_image" accept=".jpg,.jpeg,.png,.webp,image/*">
+
+                            <button type="submit">Tallenna vastaus ja sulje tiketti</button>
+                        </form>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty">
+                Ei avoimia tuntemattomia vikakoodeja.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

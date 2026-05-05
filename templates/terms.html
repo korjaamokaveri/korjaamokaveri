@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}Käyttöehdot{% endblock %}
+
+{% block extra_css %}
+<style>
+    .doc-wrap {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 24px 18px 40px;
+    }
+
+    .doc-header h1 {
+        color: white;
+        margin: 0 0 10px;
+    }
+
+    .doc-subtitle {
+        color: #cbd5e1;
+        margin: 0 0 24px;
+        line-height: 1.6;
+    }
+
+    .doc-card {
+        background: white;
+        color: #0f172a;
+        border-radius: 24px;
+        padding: 24px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    }
+
+    .doc-section {
+        margin-bottom: 24px;
+    }
+
+    .doc-section:last-child {
+        margin-bottom: 0;
+    }
+
+    .doc-section h3 {
+        margin: 0 0 10px;
+        font-size: 18px;
+        color: #0f172a;
+    }
+
+    .doc-section p {
+        margin: 0 0 12px;
+        line-height: 1.7;
+        color: #334155;
+    }
+
+    .doc-section p:last-child {
+        margin-bottom: 0;
+    }
+
+    .doc-footer-link {
+        margin-top: 24px;
+    }
+
+    .doc-footer-link a {
+        color: #1d4ed8;
+        text-decoration: none;
+        font-weight: 700;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="doc-wrap">
+    <div class="doc-header">
+        <h1>Käyttöehdot</h1>
+        <p class="doc-subtitle">
+            Korjaamo Kaveri on automaattinen diagnostiikkapalvelu, joka tarjoaa arvioita
+            ajoneuvojen vikakoodeista ja mahdollisista vioista.
+        </p>
+    </div>
+
+    <div class="doc-card">
+        <div class="doc-section">
+            <h3>1. Vastuuvapaus</h3>
+            <p>
+                Palvelun antamat tiedot ovat suuntaa-antavia ja perustuvat automaattiseen arviointiin.
+                Ne eivät korvaa ammattitaitoisen mekaanikon tekemää diagnoosia.
+            </p>
+            <p>
+                Vastuu diagnoosin oikeellisuudesta on aina työn suorittajalla tai korjaamolla.
+                Käyttäjä vastaa itse kaikista päätöksistä ja toimenpiteistä, jotka perustuvat
+                palvelun antamiin tietoihin.
+            </p>
+        </div>
+
+        <div class="doc-section">
+            <h3>2. Vastuun rajoitus</h3>
+            <p>
+                Korjaamo Kaveri ei vastaa mistään suorista tai epäsuorista vahingoista,
+                jotka aiheutuvat palvelun käytöstä, virheellisistä tulkinnoista tai tietojen
+                soveltamisesta käytännössä.
+            </p>
+            <p>
+                Tämä koskee muun muassa ajoneuvoon, henkilöön tai yritystoimintaan kohdistuvia vahinkoja.
+            </p>
+        </div>
+
+        <div class="doc-section">
+            <h3>3. Tekijänoikeudet</h3>
+            <p>
+                Kaikki palvelun sisältö, mukaan lukien tekstit, diagnostiikkalogiikka,
+                tietorakenteet, käyttöliittymä ja muu materiaali, on suojattu tekijänoikeuslain nojalla.
+            </p>
+            <p>
+                Sisällön kopiointi, tallentaminen, jakaminen, muokkaaminen tai kaupallinen hyödyntäminen
+                ilman kirjallista lupaa on kielletty.
+            </p>
+        </div>
+
+        <div class="doc-section">
+            <h3>4. Käyttäjän tuottama sisältö</h3>
+            <p>
+                Käyttäjä vastaa itse kaikesta palveluun syöttämästään tai lataamastaan sisällöstä,
+                kuten tekstistä, kuvista tai muista tiedoista.
+            </p>
+            <p>
+                Käyttäjä vakuuttaa, että hänellä on oikeus käyttää ja jakaa palveluun lisäämänsä sisältö,
+                eikä sisältö riko kolmansien osapuolten oikeuksia.
+            </p>
+            <p>
+                Käyttäjä myöntää Korjaamo Kaverille oikeuden käyttää sisältöä palvelun kehittämiseen,
+                analysointiin ja toiminnan parantamiseen.
+            </p>
+        </div>
+
+        <div class="doc-section">
+            <h3>5. Palvelun käyttö</h3>
+            <p>
+                Palvelua saa käyttää vain laillisiin tarkoituksiin. Palvelun väärinkäyttö,
+                häirintä tai järjestelmän kuormittaminen on kielletty.
+            </p>
+        </div>
+
+        <div class="doc-section">
+            <h3>6. Muutokset</h3>
+            <p>
+                Korjaamo Kaveri pidättää oikeuden muuttaa palvelua ja näitä käyttöehtoja
+                ilman erillistä ilmoitusta.
+            </p>
+        </div>
+
+        <div class="doc-footer-link">
+            <a href="{{ url_for('app_home') }}">← Takaisin etusivulle</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

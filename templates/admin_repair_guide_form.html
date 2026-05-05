@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}Korjausohje{% endblock %}
+
+{% block extra_css %}
+<style>
+    .wrap {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 24px 18px 40px;
+    }
+
+    .top h1 {
+        color: white;
+        margin: 0;
+    }
+
+    .top-subtitle {
+        color: #cbd5e1;
+        margin-top: 6px;
+        margin-bottom: 24px;
+    }
+
+    .panel {
+        background: white;
+        color: #0f172a;
+        border-radius: 24px;
+        padding: 24px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    }
+
+    .error {
+        margin-bottom: 16px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        background: #fee2e2;
+        color: #991b1b;
+        font-weight: 700;
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+    }
+
+    .full {
+        grid-column: 1 / -1;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 14px;
+        font-weight: 700;
+        color: #334155;
+    }
+
+    input, textarea {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 12px 14px;
+        border: 1px solid #cbd5e1;
+        background: #f8fafc;
+        border-radius: 14px;
+        font-size: 15px;
+    }
+
+    textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    .btn {
+        border: none;
+        width: 100%;
+        padding: 14px 16px;
+        border-radius: 14px;
+        background: #2563eb;
+        color: white;
+        font-size: 16px;
+        font-weight: 800;
+        cursor: pointer;
+    }
+
+    .info-box {
+        margin-top: 16px;
+        padding: 14px;
+        border-radius: 16px;
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        color: #1e3a8a;
+    }
+
+    @media (max-width: 800px) {
+        .grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wrap">
+    <div class="top">
+        <h1>{% if guide_mode %}Muokkaa korjausohjetta{% else %}Tee korjausohje{% endif %}</h1>
+        <div class="top-subtitle">
+            {% if guide_mode %}
+                Päivitä olemassa olevan ohjeen sisältöä.
+            {% else %}
+                Luo pyynnöstä uusi ohje ja lisää se ohjepankkiin.
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="panel">
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+
+        <form method="POST">
+            <div class="grid">
+                <div>
+                    <label for="make">Merkki</label>
+                    <input id="make" name="make" value="{{ item.make or '' }}" required>
+                </div>
+
+                <div>
+                    <label for="title">Otsikko</label>
+                    <input id="title" name="title" value="{{ item.title or '' }}" placeholder="Esim. Audi A4 etupyöränlaakerin vaihto">
+                </div>
+
+                <div class="full">
+                    <label for="steps">Työvaiheet</label>
+                    <textarea id="steps" name="steps" required>{{ item.steps or '' }}</textarea>
+                </div>
+
+                <div class="full">
+                    <label for="tools">Työkalut</label>
+                    <textarea id="tools" name="tools">{{ item.tools or '' }}</textarea>
+                </div>
+
+                <div class="full">
+                    <label for="notes">Huomiot</label>
+                    <textarea id="notes" name="notes">{{ item.notes or item.note or '' }}</textarea>
+                </div>
+
+                <div class="full">
+                    <button class="btn" type="submit">
+                        {% if guide_mode %}Tallenna muutokset{% else %}Luo korjausohje{% endif %}
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        {% if not guide_mode %}
+            <div class="info-box">
+                <strong>Pyyntödata:</strong><br>
+                VIN / rek: {{ item.vehicle_input }}<br>
+                Syötetyyppi: {{ item.input_type or 'unknown' }}<br>
+                Käyttäjä: {{ item.user_email or 'tuntematon' }}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

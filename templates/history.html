@@ -1,0 +1,382 @@
+{% extends "base.html" %}
+
+{% block title %}Diagnoosihistoria{% endblock %}
+
+{% block extra_css %}
+<style>
+    .wrap {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 24px 18px 40px;
+    }
+
+    .top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+    }
+
+    .top h1 {
+        color: white;
+        margin: 0;
+    }
+
+    .top-subtitle {
+        color: #cbd5e1;
+        margin-top: 6px;
+    }
+
+    .top-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .top-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 16px;
+        border-radius: 14px;
+        background: rgba(255,255,255,0.1);
+        color: white;
+        text-decoration: none;
+        font-weight: 700;
+        border: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .top-link:hover {
+        background: rgba(255,255,255,0.16);
+    }
+
+    .panel {
+        background: white;
+        color: #0f172a;
+        border-radius: 24px;
+        padding: 24px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    }
+
+    .history-list {
+        display: grid;
+        gap: 14px;
+    }
+
+    .history-item {
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        border-radius: 18px;
+        padding: 16px;
+    }
+
+    .code {
+        font-size: 20px;
+        font-weight: 800;
+    }
+
+    .muted {
+        color: #64748b;
+    }
+
+    .title {
+        margin-top: 8px;
+        font-weight: 700;
+    }
+
+    .empty {
+        border: 2px dashed #cbd5e1;
+        border-radius: 18px;
+        padding: 24px;
+        text-align: center;
+        color: #64748b;
+    }
+
+    .status-badge {
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: bold;
+        display: inline-block;
+    }
+
+    .status-closed {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-open {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .fix-box {
+        margin-top: 12px;
+        padding: 12px;
+        background: #ecfdf5;
+        border: 1px solid #bbf7d0;
+        border-radius: 12px;
+    }
+
+    .feedback-box {
+        margin-top: 14px;
+        padding: 14px;
+        background: #ffffff;
+        border: 1px solid #dbeafe;
+        border-radius: 14px;
+    }
+
+    .feedback-title {
+        margin: 0 0 8px;
+        font-size: 16px;
+        font-weight: 800;
+        color: #0f172a;
+    }
+
+    .feedback-subtitle {
+        color: #64748b;
+        font-size: 14px;
+        line-height: 1.5;
+        margin-bottom: 12px;
+    }
+
+    .feedback-current {
+        margin-bottom: 12px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 700;
+        background: #eff6ff;
+        color: #1d4ed8;
+        border: 1px solid #bfdbfe;
+    }
+
+    .feedback-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .feedback-form {
+        margin: 0;
+    }
+
+    .feedback-btn {
+        border: none;
+        padding: 12px 16px;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 800;
+        cursor: pointer;
+        color: white;
+        width: auto;
+        margin-top: 0;
+    }
+
+    .feedback-yes {
+        background: #16a34a;
+    }
+
+    .feedback-no {
+        background: #dc2626;
+    }
+
+    .feedback-note {
+        margin-top: 10px;
+        color: #64748b;
+        font-size: 13px;
+    }
+
+    textarea, input, button {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px 12px;
+        margin-top: 8px;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        font-size: 14px;
+    }
+
+    button {
+        background: #2563eb;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+
+    @media (max-width: 640px) {
+        .feedback-actions {
+            flex-direction: column;
+        }
+
+        .feedback-form {
+            width: 100%;
+        }
+
+        .feedback-btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wrap">
+    <div class="top">
+        <div>
+            <h1>Diagnoosihistoria</h1>
+            <div class="top-subtitle">{{ current_user['email'] }}</div>
+        </div>
+    </div>
+
+    <div class="panel">
+        {% if items %}
+            <div class="history-list">
+                {% for item in items %}
+                    <div class="history-item">
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+                            <div class="code">{{ item.code }}</div>
+                            <div class="muted" style="font-size:13px;">{{ item.created_at }}</div>
+                        </div>
+
+                        <div class="title">
+                            {{ item.make }} {{ item.model }} {{ item.engine }}
+                        </div>
+
+                        <div style="margin-top:10px;">
+                            {% if item.resolved %}
+                                <span class="status-badge status-closed">✔ Suljettu</span>
+                            {% else %}
+                                <span class="status-badge status-open">⏳ Kesken / odottaa vastausta</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="muted" style="margin-top:10px;">
+                            <strong>Oireet:</strong> {{ item.symptoms or 'Ei kuvattu' }}
+                        </div>
+
+                        {% if item.title %}
+                            <div style="margin-top:10px;">
+                                <strong>{{ item.title }}</strong>
+                            </div>
+                            <div class="muted">
+                                {{ item.description }}
+                            </div>
+                        {% endif %}
+
+                        {% if item.initial_image_path %}
+                            <div style="margin-top:12px;">
+                                <strong>Alkuperäinen käyttäjän lähettämä kuva:</strong>
+                                <div style="margin-top:8px;">
+                                    <img
+                                        src="{{ url_for('static', filename=item.initial_image_path) }}"
+                                        alt="Alkuperäinen kuva"
+                                        style="max-width:100%; width:320px; border-radius:12px; border:1px solid #cbd5e1;"
+                                    >
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        {% if item.resolved %}
+                            <div class="fix-box">
+                                <strong>🔧 Korjaus:</strong><br>
+                                {{ item.final_cause }} – {{ item.final_fix }}
+
+                                {% if item.feedback_notes %}
+                                    <div style="margin-top:6px; color:#475569;">
+                                        {{ item.feedback_notes }}
+                                    </div>
+                                {% endif %}
+
+                                {% if item.resolution_image_path %}
+                                    <div style="margin-top:12px;">
+                                        <strong>Korjauksen kuva:</strong>
+                                        <div style="margin-top:8px;">
+                                            <img
+                                                src="{{ url_for('static', filename=item.resolution_image_path) }}"
+                                                alt="Korjauksen kuva"
+                                                style="max-width:100%; width:420px; border-radius:12px; border:1px solid #cbd5e1;"
+                                            >
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="feedback-box">
+                                <div class="feedback-title">Oliko tästä hyötyä?</div>
+                                <div class="feedback-subtitle">
+                                    Voit arvioida jälkikäteen, oliko tämä ratkaisu hyödyllinen.
+                                    Palaute auttaa parantamaan tulevia korjausehdotuksia.
+                                </div>
+
+                                {% if item.user_feedback is not none %}
+                                    <div class="feedback-current">
+                                        Nykyinen palautteesi:
+                                        {% if item.user_feedback == 1 %}
+                                            👍 Hyödyllinen
+                                        {% else %}
+                                            👎 Ei hyödyllinen
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+
+                                <div class="feedback-actions">
+                                    <form class="feedback-form" method="POST" action="{{ url_for('ui_feedback') }}">
+                                        <input type="hidden" name="diagnosis_id" value="{{ item.id }}">
+                                        <input type="hidden" name="fault_code" value="{{ item.code }}">
+                                        <input type="hidden" name="title" value="{{ item.title or '' }}">
+                                        <input type="hidden" name="description" value="{{ item.description or '' }}">
+                                        <input type="hidden" name="vehicle" value="{{ item.make }} {{ item.model }} {{ item.engine }}">
+                                        <input type="hidden" name="helpful" value="1">
+                                        <button class="feedback-btn feedback-yes" type="submit">
+                                            {% if item.user_feedback == 1 %}👍 Valittuna{% else %}👍 Kyllä{% endif %}
+                                        </button>
+                                    </form>
+
+                                    <form class="feedback-form" method="POST" action="{{ url_for('ui_feedback') }}">
+                                        <input type="hidden" name="diagnosis_id" value="{{ item.id }}">
+                                        <input type="hidden" name="fault_code" value="{{ item.code }}">
+                                        <input type="hidden" name="title" value="{{ item.title or '' }}">
+                                        <input type="hidden" name="description" value="{{ item.description or '' }}">
+                                        <input type="hidden" name="vehicle" value="{{ item.make }} {{ item.model }} {{ item.engine }}">
+                                        <input type="hidden" name="helpful" value="0">
+                                        <button class="feedback-btn feedback-no" type="submit">
+                                            {% if item.user_feedback == 0 %}👎 Valittuna{% else %}👎 Ei{% endif %}
+                                        </button>
+                                    </form>
+                                </div>
+
+                                <div class="feedback-note">
+                                    Samasta tiketistä tallennetaan vain yksi palaute per käyttäjä. Uusi valinta päivittää vanhan.
+                                </div>
+                            </div>
+                        {% else %}
+                            <form method="POST"
+                                  action="{{ url_for('close_ticket_by_user_route', diagnosis_id=item.id) }}"
+                                  enctype="multipart/form-data"
+                                  style="margin-top:16px;">
+                                <input type="text" name="final_cause" placeholder="Mikä osa oli rikki / mikä oli lopullinen vika" required>
+                                <input type="text" name="final_fix" placeholder="Miten korjasit vian" required>
+                                <textarea name="notes" placeholder="Lisähuomiot"></textarea>
+
+                                <label style="display:block; margin-top:12px; font-weight:600;">
+                                    Lisää kuva korjatusta osasta tai viasta
+                                </label>
+                                <input type="file" name="resolution_image" accept=".jpg,.jpeg,.png,.webp,image/*" required>
+
+                                <button type="submit">Sulje tiketti ja lähetä korjauskuva</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty">
+                Et ole vielä tallentanut diagnooseja.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

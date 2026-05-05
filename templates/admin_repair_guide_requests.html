@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block title %}Korjausohjepyynnöt{% endblock %}
+
+{% block extra_css %}
+<style>
+    .wrap {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 24px 18px 40px;
+    }
+
+    .top h1 {
+        color: white;
+        margin: 0;
+    }
+
+    .top-subtitle {
+        color: #cbd5e1;
+        margin-top: 6px;
+        margin-bottom: 24px;
+    }
+
+    .panel {
+        background: white;
+        color: #0f172a;
+        border-radius: 24px;
+        padding: 24px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    }
+
+    .success {
+        margin-bottom: 16px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        background: #dcfce7;
+        color: #166534;
+        font-weight: 700;
+    }
+
+    .list {
+        display: grid;
+        gap: 14px;
+    }
+
+    .card {
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        border-radius: 18px;
+        padding: 16px;
+    }
+
+    .row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .title {
+        font-size: 20px;
+        font-weight: 800;
+    }
+
+    .muted {
+        color: #64748b;
+    }
+
+    .badge {
+        display: inline-block;
+        margin-top: 10px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+    .pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .completed {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .actions {
+        margin-top: 14px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 14px;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 700;
+        background: #2563eb;
+        color: white;
+    }
+
+    .btn-dark {
+        background: #0f172a;
+    }
+
+    .empty {
+        border: 2px dashed #cbd5e1;
+        border-radius: 18px;
+        padding: 24px;
+        text-align: center;
+        color: #64748b;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wrap">
+    <div class="top">
+        <h1>Korjausohjepyynnöt</h1>
+        <div class="top-subtitle">Käyttäjien tilaamat ohjeet adminille käsiteltäväksi</div>
+    </div>
+
+    <div class="panel">
+        {% if success %}
+            <div class="success">{{ success }}</div>
+        {% endif %}
+
+        {% if items %}
+            <div class="list">
+                {% for item in items %}
+                    <div class="card">
+                        <div class="row">
+                            <div class="title">{{ item.make }} – {{ item.part_name }}</div>
+                            <div class="muted">{{ item.created_at }}</div>
+                        </div>
+
+                        <div style="margin-top:8px;">
+                            <strong>Käyttäjä:</strong> {{ item.user_email or 'tuntematon' }}
+                        </div>
+
+                        <div style="margin-top:6px;">
+                            <strong>VIN / rek:</strong> {{ item.vehicle_input }}
+                        </div>
+
+                        <div style="margin-top:6px;">
+                            <strong>Syötetyyppi:</strong> {{ item.input_type or 'unknown' }}
+                        </div>
+
+                        {% if item.vin_prefix %}
+                            <div style="margin-top:6px;">
+                                <strong>VIN prefix:</strong> {{ item.vin_prefix }}
+                            </div>
+                        {% endif %}
+
+                        {% if item.note %}
+                            <div class="muted" style="margin-top:8px;">
+                                <strong>Lisätiedot:</strong> {{ item.note }}
+                            </div>
+                        {% endif %}
+
+                        <div>
+                            <span class="badge {% if item.status == 'completed' %}completed{% else %}pending{% endif %}">
+                                {% if item.status == 'completed' %}Valmis{% else %}Odottaa käsittelyä{% endif %}
+                            </span>
+                        </div>
+
+                        <div class="actions">
+                            {% if item.guide_id %}
+                                <a class="btn" href="{{ url_for('admin_repair_guides.admin_edit_repair_guide', guide_id=item.guide_id) }}">
+                                    Muokkaa ohjetta
+                                </a>
+                            {% else %}
+                                <a class="btn" href="{{ url_for('admin_repair_guides.admin_create_repair_guide', request_id=item.id) }}">
+                                    Tee ohje
+                                </a>
+                            {% endif %}
+
+                            <a class="btn btn-dark" href="{{ url_for('admin_repair_guides.admin_repair_guides') }}">
+                                Avaa ohjepankki
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty">
+                Ei vielä korjausohjepyyntöjä.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,373 @@
+{% extends "base.html" %}
+
+{% block title %}Käyttäjät{% endblock %}
+
+{% block extra_css %}
+<style>
+    .wrap {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 24px 18px 40px;
+    }
+
+    .top {
+        margin-bottom: 24px;
+    }
+
+    .top h1 {
+        color: white;
+        margin: 0;
+    }
+
+    .top-subtitle {
+        color: #cbd5e1;
+        margin-top: 6px;
+    }
+
+    .top-actions {
+        margin-top: 16px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .nav-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 14px;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 700;
+        background: rgba(255,255,255,0.12);
+        color: white;
+        border: 1px solid rgba(255,255,255,0.18);
+    }
+
+    .panel {
+        background: white;
+        color: #0f172a;
+        border-radius: 24px;
+        padding: 24px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    }
+
+    .user-list {
+        display: grid;
+        gap: 14px;
+    }
+
+    .user-card {
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        border-radius: 18px;
+        padding: 16px;
+    }
+
+    .row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .email {
+        font-size: 18px;
+        font-weight: 800;
+    }
+
+    .name {
+        margin-top: 4px;
+        font-size: 15px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .muted {
+        color: #64748b;
+    }
+
+    .details-grid {
+        margin-top: 14px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px 16px;
+    }
+
+    .detail-box {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 12px;
+    }
+
+    .detail-label {
+        font-size: 12px;
+        font-weight: 800;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 6px;
+    }
+
+    .detail-value {
+        font-size: 14px;
+        color: #0f172a;
+        line-height: 1.5;
+        word-break: break-word;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .badge-admin {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .badge-basic {
+        background: #e2e8f0;
+        color: #334155;
+    }
+
+    .badge-test {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .badge-company {
+        background: #ede9fe;
+        color: #6d28d9;
+    }
+
+    .badge-private {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .stats {
+        margin-top: 12px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .stat {
+        display: inline-flex;
+        align-items: center;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: white;
+        border: 1px solid #cbd5e1;
+        font-size: 13px;
+        font-weight: 700;
+        color: #334155;
+    }
+
+    .actions {
+        margin-top: 16px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .actions form {
+        margin: 0;
+    }
+
+    .btn {
+        border: none;
+        padding: 10px 14px;
+        border-radius: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        color: white;
+    }
+
+    .btn-admin {
+        background: #2563eb;
+    }
+
+    .btn-basic {
+        background: #0f172a;
+    }
+
+    .btn-delete {
+        background: #dc2626;
+    }
+
+    .btn-save {
+        background: #16a34a;
+    }
+
+    .disabled-note {
+        margin-top: 10px;
+        font-size: 13px;
+        color: #64748b;
+    }
+
+    select {
+        padding: 10px 12px;
+        border-radius: 12px;
+        border: 1px solid #cbd5e1;
+        background: white;
+        font-size: 14px;
+    }
+
+    @media (max-width: 800px) {
+        .details-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wrap">
+    <div class="top">
+        <h1>Käyttäjät</h1>
+        <div class="top-subtitle">
+            Admin voi hallita käyttäjiä, tilauksia ja tarkastella laskutustietoja.
+        </div>
+    </div>
+
+    <div class="panel">
+        {% if users %}
+            <div class="user-list">
+                {% for user in users %}
+                    <div class="user-card">
+                        <div class="row">
+                            <div>
+                                <div class="email">{{ user.email }}</div>
+
+                                {% if user.full_name %}
+                                    <div class="name">{{ user.full_name }}</div>
+                                {% endif %}
+
+                                <div class="muted" style="margin-top:6px;">
+                                    Luotu: {{ user.created_at }}<br>
+                                    Viime aktiivisuus: {{ user.last_active_at or 'Ei tietoa' }}
+                                </div>
+                            </div>
+
+                            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                                {% if user.is_admin == 1 %}
+                                    <span class="badge badge-admin">Admin</span>
+                                {% elif (user.account_type or 'basic') == 'test' %}
+                                    <span class="badge badge-test">Test</span>
+                                {% else %}
+                                    <span class="badge badge-basic">Basic</span>
+                                {% endif %}
+
+                                {% if (user.customer_type or 'private') == 'company' %}
+                                    <span class="badge badge-company">Yritys</span>
+                                {% else %}
+                                    <span class="badge badge-private">Yksityinen</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="stats">
+                            <div class="stat">Diagnooseja: {{ user.diagnosis_count or 0 }}</div>
+                            <div class="stat">Tikettejä: {{ user.ticket_count or 0 }}</div>
+                            <div class="stat">
+                                {% if user.is_online == 1 %}
+                                    Online
+                                {% else %}
+                                    Offline
+                                {% endif %}
+                            </div>
+                            <div class="stat">Tilaus: {{ user.subscription_status or 'inactive' }}</div>
+                        </div>
+
+                        <div class="details-grid">
+                            <div class="detail-box">
+                                <div class="detail-label">Puhelin</div>
+                                <div class="detail-value">{{ user.phone or '-' }}</div>
+                            </div>
+
+                            <div class="detail-box">
+                                <div class="detail-label">Maa</div>
+                                <div class="detail-value">{{ user.country or '-' }}</div>
+                            </div>
+
+                            <div class="detail-box">
+                                <div class="detail-label">Lähiosoite</div>
+                                <div class="detail-value">{{ user.address_line1 or '-' }}</div>
+                            </div>
+
+                            <div class="detail-box">
+                                <div class="detail-label">Postinumero ja kaupunki</div>
+                                <div class="detail-value">
+                                    {% if user.postal_code or user.city %}
+                                        {{ user.postal_code or '' }} {{ user.city or '' }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="detail-box">
+                                <div class="detail-label">Yrityksen nimi</div>
+                                <div class="detail-value">{{ user.company_name or '-' }}</div>
+                            </div>
+
+                            <div class="detail-box">
+                                <div class="detail-label">ALV-numero / Y-tunnus</div>
+                                <div class="detail-value">{{ user.vat_number or '-' }}</div>
+                            </div>
+                        </div>
+
+                        {% if current_user.id != user.id %}
+                            <div class="actions">
+                                {% if user.is_admin == 0 %}
+                                    <form method="POST" action="{{ url_for('admin.admin_make_user_admin', user_id=user.id) }}">
+                                        <button class="btn btn-admin" type="submit">Tee admin</button>
+                                    </form>
+                                {% else %}
+                                    <form method="POST" action="{{ url_for('admin.admin_make_user_basic', user_id=user.id) }}">
+                                        <button class="btn btn-basic" type="submit">Poista admin</button>
+                                    </form>
+                                {% endif %}
+
+                                <form method="POST" action="{{ url_for('admin.admin_set_account_type', user_id=user.id) }}">
+                                    <select name="account_type">
+                                        <option value="basic" {% if (user.account_type or 'basic') == 'basic' %}selected{% endif %}>Basic</option>
+                                        <option value="test" {% if (user.account_type or '') == 'test' %}selected{% endif %}>Test</option>
+                                    </select>
+
+                                    <select name="subscription_status">
+                                        <option value="inactive" {% if (user.subscription_status or 'inactive') == 'inactive' %}selected{% endif %}>Tilaus pois</option>
+                                        <option value="active" {% if (user.subscription_status or '') == 'active' %}selected{% endif %}>Tilaus aktiivinen</option>
+                                        <option value="cancelled" {% if (user.subscription_status or '') == 'cancelled' %}selected{% endif %}>Peruttu</option>
+                                        <option value="past_due" {% if (user.subscription_status or '') == 'past_due' %}selected{% endif %}>Maksu myöhässä</option>
+                                    </select>
+
+                                    <button class="btn btn-save" type="submit">Tallenna</button>
+                                </form>
+
+                                <form method="POST" action="{{ url_for('admin.admin_delete_user', user_id=user.id) }}" onsubmit="return confirm('Poistetaanko käyttäjä varmasti? Tämä poistaa myös käyttäjän tiketit, palautteet ja tokenit.');">
+                                    <button class="btn btn-delete" type="submit">Poista käyttäjä</button>
+                                </form>
+                            </div>
+                        {% else %}
+                            <div class="disabled-note">
+                                Omaa käyttäjätiliä ei voi muuttaa tai poistaa tästä näkymästä.
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="muted">Käyttäjiä ei löytynyt.</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

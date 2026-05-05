@@ -1,0 +1,301 @@
+{% extends "base.html" %}
+
+{% block title %}Tiketin tiedot{% endblock %}
+
+{% block extra_css %}
+<style>
+    .wrap {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 24px 18px 40px;
+    }
+
+    .top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+    }
+
+    .top h1 {
+        color: white;
+        margin: 0;
+    }
+
+    .top-subtitle {
+        color: #cbd5e1;
+        margin-top: 6px;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 16px;
+        border-radius: 14px;
+        background: rgba(255,255,255,0.12);
+        color: white;
+        text-decoration: none;
+        font-weight: 700;
+    }
+
+    .panel {
+        background: white;
+        color: #0f172a;
+        border-radius: 24px;
+        padding: 24px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    }
+
+    .meta-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        margin-bottom: 18px;
+    }
+
+    .meta-card {
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        border-radius: 16px;
+        padding: 14px;
+    }
+
+    .meta-label {
+        font-size: 13px;
+        font-weight: 800;
+        color: #475569;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+
+    .meta-value {
+        font-size: 16px;
+        color: #0f172a;
+        font-weight: 700;
+    }
+
+    .section {
+        margin-top: 18px;
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        border-radius: 16px;
+        padding: 16px;
+    }
+
+    .section-title {
+        margin: 0 0 10px;
+        font-size: 18px;
+        font-weight: 800;
+        color: #0f172a;
+    }
+
+    .muted {
+        color: #64748b;
+        line-height: 1.6;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 7px 11px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 800;
+    }
+
+    .badge-open {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .badge-closed {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .badge-unknown {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .stats-row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 12px;
+    }
+
+    .stat {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 800;
+    }
+
+    .stat-like {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .stat-dislike {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .stat-total {
+        background: #e2e8f0;
+        color: #334155;
+    }
+
+    .image-box img {
+        max-width: 100%;
+        width: 460px;
+        border-radius: 12px;
+        border: 1px solid #cbd5e1;
+    }
+
+    @media (max-width: 760px) {
+        .meta-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wrap">
+    <div class="top">
+        <div>
+            <h1>Tiketti #{{ item.id }}</h1>
+            <div class="top-subtitle">{{ item.code }} — {{ item.user_email }}</div>
+        </div>
+
+        <a class="back-link" href="{{ url_for('admin.admin_all_tickets') }}">← Takaisin listaan</a>
+    </div>
+
+    <div class="panel">
+        <div style="margin-bottom: 16px;">
+            {% if item.status == 'closed' %}
+                <span class="badge badge-closed">Suljettu</span>
+            {% elif item.status == 'unknown' %}
+                <span class="badge badge-unknown">Tuntematon vikakoodi</span>
+            {% else %}
+                <span class="badge badge-open">Avoin</span>
+            {% endif %}
+        </div>
+
+        <div class="meta-grid">
+            <div class="meta-card">
+                <div class="meta-label">Käyttäjä</div>
+                <div class="meta-value">{{ item.user_email }}</div>
+            </div>
+
+            <div class="meta-card">
+                <div class="meta-label">Luotu</div>
+                <div class="meta-value">{{ item.created_at }}</div>
+            </div>
+
+            <div class="meta-card">
+                <div class="meta-label">Ajoneuvo</div>
+                <div class="meta-value">{{ item.make }} {{ item.model }} {{ item.engine }}</div>
+            </div>
+
+            <div class="meta-card">
+                <div class="meta-label">Suljettu</div>
+                <div class="meta-value">{{ item.closed_at or 'Ei vielä suljettu' }}</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Oireet</div>
+            <div class="muted">{{ item.symptoms or 'Ei kuvattu' }}</div>
+        </div>
+
+        {% if item.title or item.description %}
+            <div class="section">
+                <div class="section-title">Diagnoosin tulos</div>
+                {% if item.title %}
+                    <div style="font-weight:800; margin-bottom:8px;">{{ item.title }}</div>
+                {% endif %}
+                <div class="muted">{{ item.description or 'Kuvaus puuttuu.' }}</div>
+            </div>
+        {% endif %}
+
+        <div class="section">
+            <div class="section-title">Palaute ratkaisuun</div>
+            <div class="stats-row">
+                <div class="stat stat-like">👍 {{ item.likes or 0 }}</div>
+                <div class="stat stat-dislike">👎 {{ item.dislikes or 0 }}</div>
+                <div class="stat stat-total">Yhteensä {{ item.total_votes or 0 }}</div>
+            </div>
+        </div>
+
+        {% if item.initial_image_path %}
+            <div class="section image-box">
+                <div class="section-title">Alkuperäinen kuva</div>
+                <img
+                    src="{{ url_for('static', filename=item.initial_image_path) }}"
+                    alt="Alkuperäinen kuva"
+                >
+            </div>
+        {% endif %}
+
+        {% if item.resolved %}
+            <div class="section">
+                <div class="section-title">Ratkaisu</div>
+                <div style="font-weight:800; margin-bottom:8px;">
+                    {{ item.final_cause }} – {{ item.final_fix }}
+                </div>
+
+                {% if item.feedback_notes %}
+                    <div class="muted">{{ item.feedback_notes }}</div>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        {% if item.resolution_image_path %}
+            <div class="section image-box">
+                <div class="section-title">Korjauskuva</div>
+                <img
+                    src="{{ url_for('static', filename=item.resolution_image_path) }}"
+                    alt="Korjauskuva"
+                >
+            </div>
+        {% endif %}
+
+        {% if item.result and item.result.possible_causes %}
+            <div class="section">
+                <div class="section-title">Mahdolliset syyt</div>
+                <div class="muted">
+                    {% for cause in item.result.possible_causes %}
+                        <div style="margin-bottom:8px;">
+                            <strong>{{ cause.name }}</strong> — {{ cause.description }} (score {{ cause.score }})
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+        {% if item.result and item.result.test_steps %}
+            <div class="section">
+                <div class="section-title">Testausjärjestys</div>
+                <div class="muted">
+                    {% for step in item.result.test_steps %}
+                        <div style="margin-bottom:10px;">
+                            <strong>{{ step.order }}. {{ step.title }}</strong><br>
+                            {{ step.description }}<br>
+                            <span style="color:#475569;">Työkalut: {{ step.tools }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

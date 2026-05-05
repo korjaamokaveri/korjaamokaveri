@@ -1,0 +1,432 @@
+{% extends "base.html" %}
+
+{% block title %}Admin – Vikakoodit{% endblock %}
+
+{% block extra_css %}
+<style>
+    .wrap { max-width: 1200px; margin: 0 auto; padding: 24px 18px 40px; }
+    .top { margin-bottom: 24px; }
+    .top h1 { color: white; margin: 0; }
+    .top-subtitle { color: #cbd5e1; margin-top: 6px; }
+
+    .layout {
+        display: grid;
+        grid-template-columns: 420px 1fr;
+        gap: 20px;
+        align-items: start;
+    }
+
+    .panel {
+        background: white;
+        color: #0f172a;
+        border-radius: 24px;
+        padding: 22px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    }
+
+    .panel h2 { margin-top: 0; margin-bottom: 8px; font-size: 24px; }
+    .panel-subtitle { color: #64748b; margin-bottom: 18px; line-height: 1.5; }
+
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-weight: 700; font-size: 14px; color: #334155; margin-bottom: 8px; }
+
+    .field input,
+    .field textarea {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 12px 14px;
+        border-radius: 14px;
+        border: 1px solid #cbd5e1;
+        background: #f8fafc;
+        font-size: 14px;
+    }
+
+    .field textarea { min-height: 96px; resize: vertical; }
+
+    .btn {
+        display: inline-block;
+        width: 100%;
+        border: none;
+        padding: 14px 16px;
+        border-radius: 14px;
+        font-weight: 800;
+        cursor: pointer;
+        color: white;
+        background: #2563eb;
+    }
+
+    .success {
+        margin-bottom: 16px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        background: #dcfce7;
+        color: #166534;
+        font-weight: 700;
+    }
+
+    .error {
+        margin-bottom: 16px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        background: #fee2e2;
+        color: #991b1b;
+        font-weight: 700;
+    }
+
+    .group-list { display: grid; gap: 14px; }
+
+    .make-group,
+    .system-group {
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        background: #f8fafc;
+        overflow: hidden;
+    }
+
+    .system-group {
+        margin: 12px 14px;
+        background: #ffffff;
+    }
+
+    .make-summary,
+    .system-summary {
+        list-style: none;
+        cursor: pointer;
+        padding: 16px 18px;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        background: #ffffff;
+    }
+
+    .system-summary { background: #eef2ff; }
+
+    .make-summary::-webkit-details-marker,
+    .system-summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .make-title { font-size: 18px; }
+    .make-count {
+        font-size: 13px;
+        font-weight: 700;
+        color: #475569;
+        background: #e2e8f0;
+        padding: 6px 10px;
+        border-radius: 999px;
+    }
+
+    .codes {
+        padding: 14px;
+        display: grid;
+        gap: 12px;
+    }
+
+    .code-card {
+        border: 1px solid #dbeafe;
+        background: white;
+        border-radius: 16px;
+        padding: 14px;
+    }
+
+    .code-top {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .code-value {
+        font-size: 18px;
+        font-weight: 800;
+        color: #0f172a;
+    }
+
+    .code-title {
+        margin-top: 6px;
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .code-description {
+        margin-top: 8px;
+        color: #475569;
+        line-height: 1.5;
+        white-space: pre-line;
+    }
+
+    .meta-list {
+        margin-top: 10px;
+        display: grid;
+        gap: 6px;
+        color: #475569;
+        font-size: 14px;
+    }
+
+    .actions {
+        margin-top: 12px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .action-link,
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 12px;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 14px;
+        border: none;
+        cursor: pointer;
+    }
+
+    .action-link { background: #2563eb; color: white; }
+    .action-btn-danger { background: #dc2626; color: white; }
+
+    .empty {
+        border: 2px dashed #cbd5e1;
+        border-radius: 18px;
+        padding: 24px;
+        text-align: center;
+        color: #64748b;
+    }
+
+    .hint {
+        color: #64748b;
+        font-size: 13px;
+        line-height: 1.5;
+        margin-top: 10px;
+    }
+
+    .divider {
+        margin: 24px 0;
+        border: none;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    @media (max-width: 980px) {
+        .layout { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wrap">
+    <div class="top">
+        <h1>Vikakoodit</h1>
+        <div class="top-subtitle">
+            Hallitse DTC-koodeja, yleisiä sekä merkkikohtaisia versioita.
+        </div>
+    </div>
+
+    {% if success %}
+        <div class="success">{{ success }}</div>
+    {% endif %}
+
+    {% if error %}
+        <div class="error">{{ error }}</div>
+    {% endif %}
+
+    <div class="layout">
+        <div class="panel">
+            <h2>Tuo DTC-koodeja PDF:stä</h2>
+            <div class="panel-subtitle">
+                Lataa PDF-tiedosto, josta vikakoodit tuodaan automaattisesti kirjastoon.
+            </div>
+
+            <form method="POST" action="/admin/import-dtc-pdf" enctype="multipart/form-data">
+                <div class="field">
+                    <label for="pdf_make">Merkki</label>
+                    <input id="pdf_make" name="make" type="text" placeholder="Esim. Toyota, Volvo, Volkswagen tai Yleinen" value="Toyota">
+                </div>
+
+                <div class="field">
+                    <label for="pdf_file">PDF-tiedosto</label>
+                    <input id="pdf_file" name="pdf_file" type="file" accept="application/pdf,.pdf" required>
+                </div>
+
+                <button class="btn" type="submit">Tuo PDF kirjastoon</button>
+
+                <div class="hint">
+                    Import päivittää olemassa olevan koodin samalla merkillä. Sama koodi eri merkillä luodaan omaksi rivikseen.
+                </div>
+            </form>
+
+            <hr class="divider">
+
+            <h2>Lisää uusi vikakoodi</h2>
+            <div class="panel-subtitle">
+                Sama vikakoodi voi olla usealla merkillä. Käytä merkkinä <strong>Yleinen</strong>, jos koodi ei ole merkkikohtainen.
+            </div>
+
+            <form method="POST" action="{{ url_for('admin.admin') }}">
+                <div class="field">
+                    <label for="code">DTC</label>
+                    <input id="code" name="code" type="text" placeholder="Esim. P0300" value="{{ prefill.code if prefill else '' }}" required>
+                </div>
+
+                <div class="field">
+                    <label for="make">Merkki</label>
+                    <input id="make" name="make" type="text" placeholder="Esim. Volvo tai Yleinen" value="{{ prefill.make if prefill else '' }}">
+                </div>
+
+                <div class="field">
+                    <label for="title">Otsikko</label>
+                    <input id="title" name="title" type="text" placeholder="Lyhyt otsikko" value="{{ prefill.title if prefill else '' }}" required>
+                </div>
+
+                <div class="field">
+                    <label for="description">Kuvaus</label>
+                    <textarea id="description" name="description" placeholder="Selitä vikakoodi" required>{{ prefill.description if prefill else '' }}</textarea>
+                </div>
+
+                <div class="field">
+                    <label for="problem_symptoms">Tunnetut oireet</label>
+                    <textarea id="problem_symptoms" name="problem_symptoms" placeholder="Esim. nykii, tärisee, tehot puuttuvat">{{ prefill.problem_symptoms if prefill else '' }}</textarea>
+                </div>
+
+                <div class="field">
+                    <label for="mil_status">MIL-status</label>
+                    <input id="mil_status" name="mil_status" type="text" placeholder="Esim. ON / OFF" value="{{ prefill.mil_status if prefill else '' }}">
+                </div>
+
+                <div class="field">
+                    <label for="fail_safe_function">Fail-safe function</label>
+                    <input id="fail_safe_function" name="fail_safe_function" type="text" placeholder="Esim. tehorajoitus" value="{{ prefill.fail_safe_function if prefill else '' }}">
+                </div>
+
+                <div class="field">
+                    <label for="priority">Prioriteetti</label>
+                    <input id="priority" name="priority" type="text" placeholder="Esim. A / B / high / medium" value="{{ prefill.priority if prefill else '' }}">
+                </div>
+
+                <div class="field">
+                    <label for="sae_code">SAE-koodi</label>
+                    <input id="sae_code" name="sae_code" type="text" placeholder="Esim. P0300" value="{{ prefill.sae_code if prefill else '' }}">
+                </div>
+
+                <div class="field">
+                    <label for="causes">Mahdolliset syyt</label>
+                    <textarea id="causes" name="causes" placeholder="Yksi syy per rivi">{{ prefill.causes if prefill else '' }}</textarea>
+                </div>
+
+                <div class="field">
+                    <label for="steps">Testausvaiheet</label>
+                    <textarea id="steps" name="steps" placeholder="Yksi vaihe per rivi">{{ prefill.steps if prefill else '' }}</textarea>
+                </div>
+
+                {% if prefill and prefill.ticket_id %}
+                    <input type="hidden" name="ticket_id" value="{{ prefill.ticket_id }}">
+                {% endif %}
+
+                <button class="btn" type="submit">Tallenna vikakoodi</button>
+
+                <div class="hint">
+                    Vinkki: lisää ensin yleinen versio, ja tee sen jälkeen tarvittaessa erilliset versiot merkeille kuten Volvo, BMW tai Volkswagen.
+                </div>
+            </form>
+        </div>
+
+        <div class="panel">
+            <h2>Vikakoodikirjasto</h2>
+            <div class="panel-subtitle">
+                Vikakoodit on ryhmitelty ensin merkin mukaan ja sen jälkeen järjestelmätyypin mukaan.
+            </div>
+
+            {% if grouped_fault_codes %}
+                <div class="group-list">
+                    {% for make, system_groups in grouped_fault_codes.items() %}
+                        <details class="make-group" {% if make == 'Yleinen' %}open{% endif %}>
+                            <summary class="make-summary">
+                                <span class="make-title">{{ make }}</span>
+                            </summary>
+
+                            {% for system, codes in system_groups.items() %}
+                                {% if codes %}
+                                    <details class="system-group">
+                                        <summary class="system-summary">
+                                            <span class="make-title">
+                                                {% if system == "P" %}
+                                                    P – Engine & Transmission
+                                                {% elif system == "B" %}
+                                                    B – Body
+                                                {% elif system == "C" %}
+                                                    C – Chassis
+                                                {% elif system == "U" %}
+                                                    U – Network
+                                                {% else %}
+                                                    Muut
+                                                {% endif %}
+                                            </span>
+                                            <span class="make-count">{{ codes|length }} kpl</span>
+                                        </summary>
+
+                                        <div class="codes">
+                                            {% for item in codes %}
+                                                <div class="code-card" id="fault-{{ item.id }}">
+                                                    <div class="code-top">
+                                                        <div>
+                                                            <div class="code-value">{{ item.code }}</div>
+                                                            <div class="code-title">{{ item.title }}</div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="code-description">{{ item.description }}</div>
+
+                                                    <div class="meta-list">
+                                                        {% if item.problem_symptoms %}
+                                                            <div><strong>Oireet:</strong> {{ item.problem_symptoms }}</div>
+                                                        {% endif %}
+                                                        {% if item.mil_status %}
+                                                            <div><strong>MIL-status:</strong> {{ item.mil_status }}</div>
+                                                        {% endif %}
+                                                        {% if item.fail_safe_function %}
+                                                            <div><strong>Fail-safe:</strong> {{ item.fail_safe_function }}</div>
+                                                        {% endif %}
+                                                        {% if item.priority %}
+                                                            <div><strong>Prioriteetti:</strong> {{ item.priority }}</div>
+                                                        {% endif %}
+                                                        {% if item.sae_code %}
+                                                            <div><strong>SAE:</strong> {{ item.sae_code }}</div>
+                                                        {% endif %}
+                                                    </div>
+
+                                                    <div class="actions">
+                                                        <a class="action-link" href="{{ url_for('admin.edit_fault_code_route', fault_code_id=item.id) }}">
+                                                            Muokkaa
+                                                        </a>
+
+                                                        <form method="POST"
+                                                              action="{{ url_for('admin.delete_fault_code_route', fault_code_id=item.id) }}"
+                                                              onsubmit="return confirm('Poistetaanko vikakoodi varmasti?');"
+                                                              style="display:inline;">
+                                                            <button class="action-btn action-btn-danger" type="submit">
+                                                                Poista
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </details>
+                                {% endif %}
+                            {% endfor %}
+                        </details>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty">
+                    Vikakoodeja ei löytynyt vielä.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}Tietosuojaseloste{% endblock %}
+
+{% block extra_css %}
+<style>
+    .doc-wrap {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 24px 18px 40px;
+    }
+
+    .doc-header h1 {
+        color: white;
+        margin: 0 0 10px;
+    }
+
+    .doc-subtitle {
+        color: #cbd5e1;
+        margin: 0 0 24px;
+        line-height: 1.6;
+    }
+
+    .doc-card {
+        background: white;
+        color: #0f172a;
+        border-radius: 24px;
+        padding: 24px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    }
+
+    .doc-section {
+        margin-bottom: 24px;
+    }
+
+    .doc-section:last-child {
+        margin-bottom: 0;
+    }
+
+    .doc-section h3 {
+        margin: 0 0 10px;
+        font-size: 18px;
+        color: #0f172a;
+    }
+
+    .doc-section p {
+        margin: 0;
+        line-height: 1.7;
+        color: #334155;
+    }
+
+    .doc-section ul {
+        margin: 0;
+        padding-left: 20px;
+        color: #334155;
+        line-height: 1.7;
+    }
+
+    .doc-section li + li {
+        margin-top: 4px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="doc-wrap">
+    <div class="doc-header">
+        <h1>Tietosuojaseloste</h1>
+        <p class="doc-subtitle">
+            Tämä tietosuojaseloste kuvaa, miten Korjaamo Kaveri käsittelee käyttäjätietoja.
+        </p>
+    </div>
+
+    <div class="doc-card">
+        <div class="doc-section">
+            <h3>1. Rekisterinpitäjä</h3>
+            <p>
+                Korjaamo Kaveri<br>
+                (Yksityinen kehitysprojekti)
+            </p>
+        </div>
+
+        <div class="doc-section">
+            <h3>2. Kerättävät tiedot</h3>
+            <ul>
+                <li>Sähköpostiosoite</li>
+                <li>Salasana (tallennetaan hashattuna, ei selkokielisenä)</li>
+                <li>Diagnoosihistoria</li>
+                <li>Syötetyt ajoneuvotiedot (merkki, malli, moottori)</li>
+                <li>Oirekuvaukset</li>
+                <li>Tikettien sisältö ja vastaukset</li>
+                <li>Kirjautumis- ja aktiivisuustiedot</li>
+                <li>Käyttäjän lähettämät kuvat, jos niitä lisätään palveluun</li>
+            </ul>
+        </div>
+
+        <div class="doc-section">
+            <h3>3. Tietojen käyttötarkoitus</h3>
+            <p>
+                Tietoja käytetään palvelun tarjoamiseen, vikadiagnoosien tuottamiseen,
+                käyttäjäkohtaisen historian tallentamiseen, tikettien käsittelyyn sekä
+                palvelun kehittämiseen.
+            </p>
+        </div>
+
+        <div class="doc-section">
+            <h3>4. Tietojen luovutus</h3>
+            <p>
+                Tietoja ei myydä, vuokrata tai luovuteta kolmansille osapuolille ilman
+                lain mukaista perustetta.
+            </p>
+        </div>
+
+        <div class="doc-section">
+            <h3>5. Tietojen säilytys</h3>
+            <p>
+                Tiedot säilytetään niin kauan kuin käyttäjätili on aktiivinen tai kunnes
+                käyttäjä pyytää tietojen poistamista, ellei lakisääteinen velvoite edellytä
+                pidempää säilytystä.
+            </p>
+        </div>
+
+        <div class="doc-section">
+            <h3>6. Käyttäjän oikeudet</h3>
+            <ul>
+                <li>Oikeus tarkastaa omat tiedot</li>
+                <li>Oikeus pyytää tietojen poistamista</li>
+                <li>Oikeus pyytää virheellisten tietojen korjaamista</li>
+            </ul>
+        </div>
+
+        <div class="doc-section">
+            <h3>7. Vastuunrajoitus</h3>
+            <p>
+                Palvelu tarjoaa suuntaa-antavia arvioita eikä vastaa mahdollisista virheistä
+                tai vahingoista, joita tietojen käytöstä voi aiheutua.
+            </p>
+        </div>
+
+        <div class="doc-section">
+            <h3>8. Yhteydenotto</h3>
+            <p>
+                Mahdollisissa tietosuojaan liittyvissä kysymyksissä ota yhteyttä palvelun ylläpitäjään.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
