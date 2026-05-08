@@ -1,5 +1,5 @@
 from flask import Flask, render_template_string
-
+from services.user_service import make_user_admin, update_user_password
 from db_init import init_db
 from services.diagnostics_service import diagnose
 from services.user_service import make_user_admin
@@ -53,7 +53,14 @@ def create_app():
     @app.context_processor
     def inject_user():
         return dict(current_user=get_current_user())
-
+    
+    @app.route("/fix-admin-temp")
+    def fix_admin_temp():
+        email = "ville_salovaara@hotmail.com"
+        update_user_password(email, "Testi12345")
+        make_user_admin(email)
+        return "Admin korjattu. Salasana on Testi12345"
+        
     @app.route("/")
     def home():
         return "Korjaamo Kaveri toimii 🚀"
