@@ -108,24 +108,37 @@ def register_auth_routes(app):
         error = None
         email = ""
 
-        if not user:
-            error = "Käyttäjää ei löydy tietokannasta."
-        elif not check_password_hash(user["password_hash"], password):
-            error = "Salasana on väärä."
-        else:
-            session["user_id"] = user["id"]
-            set_user_online(user["id"])
+        if request.method == "POST":
+            email = request.form.get("email", "").strip().lower()
+            password = request.form.get("password", "")
 
-        if user["is_admin"] == 1:
-            return redirect(url_for("admin.admin"))
+            user = get_user_by_email(email)
 
-        return redirect(url_for("app_home"))
-            @app.route("/forgot-password", methods=["GET", "POST"])
-        def forgot_password():
-            error = None
-            success = None
-            email = ""
-            reset_link = None
+            if not user:
+                error = "Käyttäjää ei löydy tietokannasta."
+            elif not check_password_hash(user["password_hash"], password):
+                error = "Salasana on väärä."
+            else:
+                session["user_id"] = user["id"]
+                set_user_online(user["id"])
+
+                if user["is_admin"] == 1:
+                    return redirect(url_for("admin.admin"))
+
+                return redirect(url_for("app_home"))
+
+        return render_template(
+            "login.html",
+            error=error,
+            email=email,
+        )
+
+    @app.route("/forgot-password", methods=["GET", "POST"])
+    def forgot_password():
+        error = None
+        success = None
+        email = ""
+        reset_link = None
 
         if request.method == "POST":
             email = request.form.get("email", "").strip().lower()
@@ -270,36 +283,46 @@ def register_auth_routes(app):
         )
 
         return jsonify({"success": True, "message": "Rekisteröinti onnistui."}), 201
-        
-    @app.route("/login", methods=["GET", "POST"])
-    def login():
-        error = None
-        email = ""
 
-        if request.method == "POST":
-            email = request.form.get("email", "").strip().lower()
-            password = request.form.get("password", "")
+    @app.route("/api/login", methods=["POST"])
+    def api_login():
+        data = request.get_json(silent=True) or {}
 
-            user = get_user_by_email(email)
+        email = data.get("email", "").strip().lower()
+        password = data.get("password", "")
 
-            if not user:
-                error = "Käyttäjää ei löydy tietokannasta."
-            elif not check_password_hash(user["password_hash"], password):
-                error = "Salasana on väärä."
-            else:
-                session["user_id"] = user["id"]
-                set_user_online(user["id"])
+        if not email or not password:
+            return jsonify({
+                "success": False,
+                "message": "Sähköposti ja salasana ovat pakollisia."
+            }), 400
 
-                if user["is_admin"] == 1:
-                    return redirect(url_for("admin.admin"))
+        user = get_user_by_email(email)
 
-                return redirect(url_for("app_home"))
+        if not user:
+            return jsonify({
+                "success": False,
+                "message": "Käyttäjää ei löydy tietokannasta."
+            }), 401
 
-        return render_template(
-            "login.html",
-            error=error,
-            email=email,
-        )
+        if not check_password_hash(user["password_hash"], password):
+            return jsonify({
+                "success": False,
+                "message": "Salasana on väärä."
+            }), 401
+
+        session["user_id"] = user["id"]
+        set_user_online(user["id"])
+
+        return jsonify({
+            "success": True,
+            "message": "Kirjautuminen onnistui.",
+            "user": {
+                "id": user["id"],
+                "email": user["email"],
+                "is_admin": user["is_admin"]
+            }
+        }), 200
 
     @app.route("/api/forgot-password", methods=["POST"])
     def api_forgot_password():
