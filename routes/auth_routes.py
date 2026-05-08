@@ -270,40 +270,36 @@ def register_auth_routes(app):
         )
 
         return jsonify({"success": True, "message": "Rekisteröinti onnistui."}), 201
+        
+    @app.route("/login", methods=["GET", "POST"])
+    def login():
+        error = None
+        email = ""
 
-    @app.route("/api/login", methods=["POST"])
-    def api_login():
-        data = request.get_json(silent=True) or {}
+        if request.method == "POST":
+            email = request.form.get("email", "").strip().lower()
+            password = request.form.get("password", "")
 
-        email = data.get("email", "").strip().lower()
-        password = data.get("password", "")
+            user = get_user_by_email(email)
 
-        if not email or not password:
-            return jsonify({
-                "success": False,
-                "message": "Sähköposti ja salasana ovat pakollisia."
-            }), 400
+            if not user:
+                error = "Käyttäjää ei löydy tietokannasta."
+            elif not check_password_hash(user["password_hash"], password):
+                error = "Salasana on väärä."
+            else:
+                session["user_id"] = user["id"]
+                set_user_online(user["id"])
 
-        user = get_user_by_email(email)
+                if user["is_admin"] == 1:
+                    return redirect(url_for("admin.admin"))
 
-        if not user or not check_password_hash(user["password_hash"], password):
-            return jsonify({
-                "success": False,
-                "message": "Väärä sähköposti tai salasana."
-            }), 401
+                return redirect(url_for("app_home"))
 
-        session["user_id"] = user["id"]
-        set_user_online(user["id"])
-
-        return jsonify({
-            "success": True,
-            "message": "Kirjautuminen onnistui.",
-            "user": {
-                "id": user["id"],
-                "email": user["email"],
-                "is_admin": user["is_admin"]
-            }
-        }), 200
+        return render_template(
+            "login.html",
+            error=error,
+            email=email,
+        )
 
     @app.route("/api/forgot-password", methods=["POST"])
     def api_forgot_password():
