@@ -108,35 +108,24 @@ def register_auth_routes(app):
         error = None
         email = ""
 
-        if request.method == "POST":
-            email = request.form.get("email", "").strip().lower()
-            password = request.form.get("password", "")
+        if not user:
+            error = "Käyttäjää ei löydy tietokannasta."
+        elif not check_password_hash(user["password_hash"], password):
+            error = "Salasana on väärä."
+        else:
+            session["user_id"] = user["id"]
+            set_user_online(user["id"])
 
-            user = get_user_by_email(email)
+        if user["is_admin"] == 1:
+            return redirect(url_for("admin.admin"))
 
-            if not user or not check_password_hash(user["password_hash"], password):
-                error = "Väärä sähköposti tai salasana."
-            else:
-                session["user_id"] = user["id"]
-                set_user_online(user["id"])
-
-                if user["is_admin"] == 1:
-                    return redirect(url_for("admin.admin"))
-
-                return redirect(url_for("app_home"))
-
-        return render_template(
-            "login.html",
-            error=error,
-            email=email,
-        )
-
-    @app.route("/forgot-password", methods=["GET", "POST"])
-    def forgot_password():
-        error = None
-        success = None
-        email = ""
-        reset_link = None
+        return redirect(url_for("app_home"))
+            @app.route("/forgot-password", methods=["GET", "POST"])
+        def forgot_password():
+            error = None
+            success = None
+            email = ""
+            reset_link = None
 
         if request.method == "POST":
             email = request.form.get("email", "").strip().lower()
