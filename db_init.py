@@ -1,6 +1,8 @@
 import csv
 import sqlite3
-from config import DB_PATH
+from utils.config import Config
+
+DB_PATH = Config.DB_PATH
 
 
 def get_connection():
