@@ -5,8 +5,9 @@ import stripe
 from flask import render_template, request, jsonify, current_app, redirect, url_for
 from werkzeug.utils import secure_filename
 
-from config import STRIPE_SECRET_KEY, STRIPE_PRICE_BASIC, BASE_URL
-from decorators import get_current_user, base_system_required
+from utils.config import Config
+from utils.auth import get_current_user
+from decorators import base_system_required
 from services.user_service import can_user_view_repair_guides
 from services.diagnostics_service import diagnose
 from services.vin_service import detect_vehicle_identifier
@@ -23,7 +24,7 @@ from services.repair_guide_service import (
     get_user_requests,
 )
 
-stripe.api_key = STRIPE_SECRET_KEY
+stripe.api_key = Config.STRIPE_SECRET_KEY
 
 ALLOWED_IMAGE_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
 
@@ -108,7 +109,7 @@ def register_main_routes(app):
         if not current_user:
             return redirect(url_for("login"))
 
-        if not STRIPE_SECRET_KEY or not STRIPE_PRICE_BASIC:
+        if not Config.STRIPE_SECRET_KEY or not Config.STRIPE_PRICE_BASIC:
             return redirect(url_for(
                 "subscription_required",
                 success="Stripe-asetukset puuttuvat."
@@ -124,7 +125,7 @@ def register_main_routes(app):
             mode="subscription",
             line_items=[
                 {
-                    "price": STRIPE_PRICE_BASIC,
+                    "price": Config.STRIPE_PRICE_BASIC,
                     "quantity": 1,
                 }
             ],
@@ -135,8 +136,8 @@ def register_main_routes(app):
                 "product_type": "basic_subscription",
                 "product_key": "basic",
             },
-            success_url=f"{BASE_URL}/subscription-success?session_id={{CHECKOUT_SESSION_ID}}",
-            cancel_url=f"{BASE_URL}/subscription-cancel",
+            success_url=f"{Config.BASE_URL}/subscription-success?session_id={{CHECKOUT_SESSION_ID}}",
+            cancel_url=f"{Config.BASE_URL}/subscription-cancel",
         )
 
         return redirect(checkout_session.url, code=303)
@@ -563,7 +564,7 @@ def register_main_routes(app):
                 diagnosis_id=diagnosis_id,
                 user_feedback=None,
                 repair_guide=None,
-                can_view_repair_guide=can_view_repair_guide,
+                can_view_repair_guide=can_view_repair_guides(current_user),
             )
 
         if current_user:
@@ -588,5 +589,5 @@ def register_main_routes(app):
             diagnosis_id=diagnosis_id,
             user_feedback=None,
             repair_guide=None,
-            can_view_repair_guide=can_view_repair_guide,
+            can_view_repair_guide=can_user_view_repair_guides(current_user),
         )
