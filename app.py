@@ -53,14 +53,7 @@ def create_app():
     @app.context_processor
     def inject_user():
         return dict(current_user=get_current_user())
-    
-    @app.route("/fix-admin-temp")
-    def fix_admin_temp():
-        email = "ville_salovaara@hotmail.com"
-        update_user_password(email, "Testi12345")
-        make_user_admin(email)
-        return "Admin korjattu. Salasana on Testi12345"
-        
+      
     @app.route("/")
     def home():
         return "Korjaamo Kaveri toimii 🚀"
@@ -73,7 +66,14 @@ def create_app():
     def make_admin_temp():
         make_user_admin("ville_salovaara@hotmail.com")
         return "Admin-oikeus annettu"
-
+        
+    @app.route("/fix-admin-temp")
+    def fix_admin_temp():
+        email = "ville_salovaara@hotmail.com"
+        update_user_password(email, "Testi12345")
+        make_user_admin(email)
+        return "Admin korjattu. Salasana on Testi12345"
+        
     return app
 
 def cli_test():
