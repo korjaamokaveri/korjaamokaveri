@@ -56,9 +56,6 @@ def base_system_required(func):
         if user["is_admin"] == 1:
             return func(*args, **kwargs)
 
-        if user["subscription_status"] != "active":
-            return redirect("/subscription-required")
-
         return func(*args, **kwargs)
 
     return wrapper
