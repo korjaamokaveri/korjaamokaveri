@@ -98,7 +98,12 @@ class PostgresCursor:
         try:
             self.cursor.executemany(sql_converted, seq_of_params)
         except errors.DuplicateColumn:
+            self.conn.rollback()
             raise sqlite3.OperationalError("duplicate column")
+
+        except psycopg2.Error as e:
+            self.conn.rollback()
+            raise e
 
         return self
 
