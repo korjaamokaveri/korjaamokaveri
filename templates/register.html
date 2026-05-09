@@ -1,70 +1,356 @@
+```html
 {% extends "base.html" %}
 
 {% block title %}Rekisteröidy{% endblock %}
 
+{% block extra_css %}
+<style>
+    .auth-wrap {
+        max-width: 980px;
+        margin: 50px auto;
+        padding: 0 20px;
+    }
+
+    .auth-hero {
+        margin-bottom: 26px;
+    }
+
+    .auth-title {
+        margin: 0 0 10px;
+        font-size: 42px;
+        font-weight: 900;
+    }
+
+    .auth-subtitle {
+        margin: 0;
+        color: rgba(255,255,255,0.82);
+        line-height: 1.6;
+        font-size: 16px;
+    }
+
+    .auth-card {
+        background: rgba(255,255,255,0.98);
+        color: #0f172a;
+        border-radius: 30px;
+        padding: 32px;
+        box-shadow: 0 30px 80px rgba(0,0,0,0.35);
+    }
+
+    .section {
+        margin-bottom: 32px;
+    }
+
+    .section-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0 0 18px;
+        font-size: 22px;
+        font-weight: 900;
+    }
+
+    .section-badge {
+        width: 32px;
+        height: 32px;
+        border-radius: 999px;
+        background: #dbeafe;
+        color: #2563eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        font-size: 14px;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+    }
+
+    .full {
+        grid-column: 1 / -1;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .form-group label {
+        font-size: 14px;
+        font-weight: 700;
+        color: #334155;
+    }
+
+    .form-input,
+    .form-select {
+        width: 100%;
+        border: 1px solid #cbd5e1;
+        background: #f8fafc;
+        border-radius: 16px;
+        padding: 15px 16px;
+        font-size: 15px;
+        transition: 0.2s ease;
+        outline: none;
+    }
+
+    .form-input:focus,
+    .form-select:focus {
+        background: white;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 4px rgba(37,99,235,0.12);
+    }
+
+    .company-box {
+        margin-top: 18px;
+        padding: 18px;
+        border-radius: 20px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+    }
+
+    .privacy-box {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        padding: 18px;
+        background: #f8fafc;
+        border-radius: 18px;
+        border: 1px solid #e2e8f0;
+        color: #475569;
+        line-height: 1.5;
+    }
+
+    .privacy-box input {
+        transform: scale(1.15);
+        margin-top: 4px;
+    }
+
+    .privacy-box a {
+        color: #2563eb;
+        font-weight: 800;
+        text-decoration: none;
+    }
+
+    .submit-btn {
+        margin-top: 24px;
+        border: 0;
+        background: #2563eb;
+        color: white;
+        border-radius: 16px;
+        padding: 15px 24px;
+        font-size: 16px;
+        font-weight: 900;
+        cursor: pointer;
+        transition: 0.2s ease;
+        box-shadow: 0 14px 30px rgba(37,99,235,0.25);
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-1px);
+        background: #1d4ed8;
+    }
+
+    .login-link {
+        margin-top: 18px;
+        color: #64748b;
+        font-size: 14px;
+    }
+
+    .login-link a {
+        color: #2563eb;
+        font-weight: 800;
+        text-decoration: none;
+    }
+
+    .alert {
+        margin-bottom: 18px;
+        padding: 15px 18px;
+        border-radius: 16px;
+        font-weight: 700;
+    }
+
+    .alert-error {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .alert-success {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    @media (max-width: 760px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .auth-card {
+            padding: 22px;
+            border-radius: 22px;
+        }
+
+        .auth-title {
+            font-size: 32px;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="auth-wrap">
-    <h1 class="auth-title">Rekisteröidy</h1>
+
+    <div class="auth-hero">
+        <h1 class="auth-title">Luo Korjaamo Kaveri -tili</h1>
+
+        <p class="auth-subtitle">
+            Rekisteröidy ja tallenna diagnoosit, tiketit sekä korjaushistoria turvallisesti samaan paikkaan.
+        </p>
+    </div>
 
     <div class="auth-card">
-        <form method="POST">
-
-            <!-- PERUSTIEDOT -->
-            <h3>Perustiedot</h3>
-
-            <input name="full_name" placeholder="Koko nimi" required value="{{ full_name or '' }}">
-            <input name="phone" placeholder="Puhelin" required value="{{ phone or '' }}">
-            <input name="email" type="email" placeholder="Sähköposti" required value="{{ email or '' }}">
-            <input name="password" type="password" placeholder="Salasana" required>
-            <input name="password2" type="password" placeholder="Vahvista salasana" required>
-
-            <!-- OSOITE -->
-            <h3>Osoite</h3>
-
-            <input name="address_line1" placeholder="Lähiosoite" required value="{{ address_line1 or '' }}">
-            <input name="postal_code" placeholder="Postinumero" required value="{{ postal_code or '' }}">
-            <input name="city" placeholder="Kaupunki" required value="{{ city or '' }}">
-            <input name="country" placeholder="Maa" required value="{{ country or 'Suomi' }}">
-
-            <!-- LASKUTUS -->
-            <h3>Laskutus</h3>
-
-            <select name="customer_type" id="customer_type" onchange="toggleCompany()">
-                <option value="private" {% if (customer_type or 'private') == 'private' %}selected{% endif %}>Yksityinen</option>
-                <option value="company" {% if customer_type == 'company' %}selected{% endif %}>Yritys</option>
-            </select>
-
-            <div id="companyBox" style="display:none;">
-                <input name="company_name" placeholder="Yrityksen nimi" value="{{ company_name or '' }}">
-                <input name="vat_number" placeholder="ALV / Y-tunnus" value="{{ vat_number or '' }}">
-            </div>
-
-            <label>
-                <input type="checkbox" name="accept_privacy" value="yes" required {% if accept_privacy %}checked{% endif %}>
-                Hyväksyn <a href="{{ url_for('privacy') }}">tietosuojaselosteen</a>
-            </label>
-
-            <button type="submit">Luo tili</button>
-
-        </form>
 
         {% if error %}
-            <p style="color:red;">{{ error }}</p>
+            <div class="alert alert-error">{{ error }}</div>
         {% endif %}
 
         {% if success %}
-            <p style="color:green;">{{ success }}</p>
+            <div class="alert alert-success">{{ success }}</div>
         {% endif %}
 
-        <p><a href="{{ url_for('login') }}">Kirjaudu</a></p>
+        <form method="POST">
+
+            <div class="section">
+                <h3 class="section-title">
+                    <span class="section-badge">1</span>
+                    Perustiedot
+                </h3>
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label>Koko nimi</label>
+                        <input class="form-input" name="full_name" required value="{{ full_name or '' }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Puhelin</label>
+                        <input class="form-input" name="phone" required value="{{ phone or '' }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Sähköposti</label>
+                        <input class="form-input" name="email" type="email" required value="{{ email or '' }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Salasana</label>
+                        <input class="form-input" name="password" type="password" required>
+                    </div>
+
+                    <div class="form-group full">
+                        <label>Vahvista salasana</label>
+                        <input class="form-input" name="password2" type="password" required>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="section">
+                <h3 class="section-title">
+                    <span class="section-badge">2</span>
+                    Osoite
+                </h3>
+
+                <div class="form-grid">
+
+                    <div class="form-group full">
+                        <label>Lähiosoite</label>
+                        <input class="form-input" name="address_line1" required value="{{ address_line1 or '' }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Postinumero</label>
+                        <input class="form-input" name="postal_code" required value="{{ postal_code or '' }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Kaupunki</label>
+                        <input class="form-input" name="city" required value="{{ city or '' }}">
+                    </div>
+
+                    <div class="form-group full">
+                        <label>Maa</label>
+                        <input class="form-input" name="country" required value="{{ country or 'Suomi' }}">
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="section">
+                <h3 class="section-title">
+                    <span class="section-badge">3</span>
+                    Laskutus
+                </h3>
+
+                <div class="form-group">
+                    <label>Asiakastyyppi</label>
+
+                    <select class="form-select" name="customer_type" id="customer_type" onchange="toggleCompany()">
+                        <option value="private" {% if (customer_type or 'private') == 'private' %}selected{% endif %}>Yksityinen</option>
+                        <option value="company" {% if customer_type == 'company' %}selected{% endif %}>Yritys</option>
+                    </select>
+                </div>
+
+                <div id="companyBox" class="company-box" style="display:none;">
+                    <div class="form-grid">
+
+                        <div class="form-group">
+                            <label>Yrityksen nimi</label>
+                            <input class="form-input" name="company_name" value="{{ company_name or '' }}">
+                        </div>
+
+                        <div class="form-group">
+                            <label>ALV / Y-tunnus</label>
+                            <input class="form-input" name="vat_number" value="{{ vat_number or '' }}">
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="privacy-box">
+                <input type="checkbox" name="accept_privacy" value="yes" required {% if accept_privacy %}checked{% endif %}>
+
+                <div>
+                    Hyväksyn
+                    <a href="{{ url_for('privacy') }}">tietosuojaselosteen</a>.
+                </div>
+            </div>
+
+            <button class="submit-btn" type="submit">
+                Luo tili
+            </button>
+
+            <div class="login-link">
+                Onko sinulla jo tili?
+                <a href="{{ url_for('login') }}">Kirjaudu sisään</a>
+            </div>
+
+        </form>
     </div>
 </div>
 
 <script>
 function toggleCompany() {
     const type = document.getElementById("customer_type").value;
-    document.getElementById("companyBox").style.display = type === "company" ? "block" : "none";
+    document.getElementById("companyBox").style.display =
+        type === "company" ? "block" : "none";
 }
+
 toggleCompany();
 </script>
 {% endblock %}
+```
