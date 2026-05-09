@@ -107,9 +107,10 @@ class PostgresConnection:
         self.conn = conn
 
     def cursor(self):
-        return PostgresCursor(
-            self.conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-        )
+    return PostgresCursor(
+        self.conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor),
+        self.conn
+    )
 
     def commit(self):
         self.conn.commit()
