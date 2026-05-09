@@ -14,8 +14,9 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 
 
 class PostgresCursor:
-    def __init__(self, cursor):
+    def __init__(self, cursor, conn):
         self.cursor = cursor
+        self.conn = conn
         self.lastrowid = None
 
     @property
