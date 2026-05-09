@@ -80,13 +80,6 @@ def create_app():
 
         return "Admin korjattu. Kirjaudu: ville_salovaara@hotmail.com / Testi12345"
         
-    @app.route("/fix-admin-temp")
-    def fix_admin_temp():
-        email = "ville_salovaara@hotmail.com"
-        update_user_password(email, "Testi12345")
-        make_user_admin(email)
-        return "Admin korjattu. Salasana on Testi12345"
-        
     return app
 
 def cli_test():
