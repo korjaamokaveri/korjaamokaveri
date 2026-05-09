@@ -66,19 +66,6 @@ def create_app():
     @app.route("/logged-out")
     def logged_out():
         return render_template_string(LOGOUT_PAGE)
-
-    @app.route("/fix-admin-temp")
-    def fix_admin_temp():
-        email = "ville_salovaara@hotmail.com"
-        user = get_user_by_email(email)
-
-        if not user:
-            return "Admin-käyttäjää ei löydy. Rekisteröi ensin ville_salovaara@hotmail.com"
-
-        update_user_password(user["id"], "Testi12345")
-        make_user_admin(email)
-
-        return "Admin korjattu. Kirjaudu: ville_salovaara@hotmail.com / Testi12345"
         
     return app
 
