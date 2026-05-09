@@ -1,338 +1,192 @@
-{% extends "base.html" %}
+```html
+<!-- templates/base.html -->
 
-{% block title %}Rekisteröidy{% endblock %}
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Korjaamo Kaveri{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-{% block extra_css %}
-<style>
-    .auth-wrap {
-        max-width: 980px;
-        margin: 32px auto;
-    }
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-    .auth-hero {
-        color: white;
-        margin-bottom: 22px;
-    }
-
-    .auth-title {
-        margin: 0 0 8px;
-        font-size: 36px;
-        font-weight: 900;
-    }
-
-    .auth-subtitle {
-        margin: 0;
-        color: rgba(255,255,255,0.82);
-        font-size: 16px;
-        line-height: 1.5;
-    }
-
-    .auth-card {
-        background: #ffffff;
-        border-radius: 28px;
-        padding: 28px;
-        box-shadow: 0 24px 70px rgba(0,0,0,0.25);
-    }
-
-    .form-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 18px;
-    }
-
-    .section {
-        margin-bottom: 28px;
-    }
-
-    .section-title {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin: 0 0 16px;
-        color: #0f172a;
-        font-size: 20px;
-        font-weight: 850;
-    }
-
-    .section-badge {
-        width: 30px;
-        height: 30px;
-        border-radius: 999px;
-        background: #e0ecff;
-        color: #1d4ed8;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 14px;
-        font-weight: 900;
-    }
-
-    .form-group {
-        display: flex;
-        flex-direction: column;
-        gap: 7px;
-    }
-
-    .form-group label {
-        color: #334155;
-        font-size: 14px;
-        font-weight: 750;
-    }
-
-    .form-input,
-    .form-select {
-        width: 100%;
-        box-sizing: border-box;
-        border: 1px solid #cbd5e1;
-        background: #f8fafc;
-        border-radius: 14px;
-        padding: 14px 15px;
-        font-size: 15px;
-        outline: none;
-        transition: 0.2s ease;
-    }
-
-    .form-input:focus,
-    .form-select:focus {
-        background: #fff;
-        border-color: #2563eb;
-        box-shadow: 0 0 0 4px rgba(37,99,235,0.12);
-    }
-
-    .full {
-        grid-column: 1 / -1;
-    }
-
-    .company-box {
-        margin-top: 18px;
-        padding: 18px;
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 20px;
-    }
-
-    .privacy-box {
-        display: flex;
-        gap: 12px;
-        align-items: flex-start;
-        padding: 16px;
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 18px;
-        color: #475569;
-        line-height: 1.5;
-    }
-
-    .privacy-box input {
-        margin-top: 4px;
-        transform: scale(1.15);
-    }
-
-    .privacy-box a {
-        color: #1d4ed8;
-        font-weight: 800;
-        text-decoration: none;
-    }
-
-    .alert {
-        margin: 0 0 18px;
-        padding: 14px 16px;
-        border-radius: 16px;
-        font-weight: 750;
-    }
-
-    .alert-error {
-        background: #fee2e2;
-        color: #991b1b;
-    }
-
-    .alert-success {
-        background: #dcfce7;
-        color: #166534;
-    }
-
-    .actions {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 16px;
-        margin-top: 22px;
-        flex-wrap: wrap;
-    }
-
-    .submit-btn {
-        border: 0;
-        border-radius: 16px;
-        padding: 14px 22px;
-        background: #2563eb;
-        color: white;
-        font-size: 16px;
-        font-weight: 900;
-        cursor: pointer;
-        box-shadow: 0 12px 28px rgba(37,99,235,0.28);
-        transition: 0.2s ease;
-    }
-
-    .submit-btn:hover {
-        transform: translateY(-1px);
-        background: #1d4ed8;
-    }
-
-    .login-link {
-        color: #64748b;
-        font-size: 14px;
-    }
-
-    .login-link a {
-        color: #1d4ed8;
-        text-decoration: none;
-        font-weight: 850;
-    }
-
-    @media (max-width: 760px) {
-        .auth-card {
-            padding: 20px;
-            border-radius: 22px;
+    <style>
+        * {
+            box-sizing: border-box;
         }
 
-        .form-grid {
-            grid-template-columns: 1fr;
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background:
+                linear-gradient(
+                    180deg,
+                    #020817 0%,
+                    #071330 100%
+                );
+            color: white;
+            min-height: 100vh;
         }
 
-        .auth-title {
-            font-size: 30px;
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background: rgba(0,0,0,0.35);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
-    }
-</style>
-{% endblock %}
 
-{% block content %}
-<div class="auth-wrap">
-    <div class="auth-hero">
-        <h1 class="auth-title">Luo Korjaamo Kaveri -tili</h1>
-        <p class="auth-subtitle">
-            Tallenna diagnoosit, seuraa tikettejä ja hallitse omia korjaustietojasi yhdessä paikassa.
-        </p>
+        .nav-left,
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .brand {
+            font-size: 24px;
+            font-weight: 900;
+            margin-right: 12px;
+            color: white;
+            text-decoration: none;
+        }
+
+        .nav a {
+            color: rgba(255,255,255,0.92);
+            text-decoration: none;
+            font-weight: 700;
+            padding: 10px 14px;
+            border-radius: 12px;
+            transition: 0.2s ease;
+        }
+
+        .nav a:hover {
+            background: rgba(255,255,255,0.12);
+        }
+
+        .badge {
+            font-size: 12px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-weight: 800;
+        }
+
+        .badge-admin {
+            background: #dc2626;
+            color: white;
+        }
+
+        .badge-test {
+            background: #16a34a;
+            color: white;
+        }
+
+        .badge-basic {
+            background: #2563eb;
+            color: white;
+        }
+
+        .content {
+            padding: 28px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 16px;
+            border-radius: 14px;
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            font-weight: 800;
+            transition: 0.2s ease;
+        }
+
+        .btn:hover {
+            background: #1d4ed8;
+        }
+
+        @media (max-width: 760px) {
+            .nav {
+                padding: 14px 16px;
+            }
+
+            .brand {
+                font-size: 20px;
+            }
+
+            .content {
+                padding: 18px;
+            }
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<div class="nav">
+    <div class="nav-left">
+        <a href="/" class="brand">Korjaamo Kaveri</a>
+
+        {% if current_user %}
+            <a href="{{ url_for('app_home') }}">Etusivu</a>
+            <a href="{{ url_for('order_repair_guide') }}">Korjausohje</a>
+            <a href="{{ url_for('history') }}">Historia</a>
+            <a href="{{ url_for('popular_repairs_page') }}">Suosituimmat</a>
+
+            {% if current_user.is_admin == 1 %}
+                <a href="{{ url_for('admin.admin') }}">📚 DTC-kirjasto</a>
+                <a href="{{ url_for('admin.admin_users') }}">Käyttäjät</a>
+                <a href="{{ url_for('admin.admin_accounting') }}">Kirjanpito</a>
+                <a href="{{ url_for('admin_repair_guides.admin_repair_guide_requests') }}">Ohjepyynnöt</a>
+                <a href="{{ url_for('admin_repair_guides.admin_repair_guides') }}">Ohjepankki</a>
+            {% endif %}
+        {% endif %}
     </div>
 
-    <div class="auth-card">
-        {% if error %}
-            <div class="alert alert-error">{{ error }}</div>
+    <div class="nav-right">
+        {% if current_user %}
+            <span class="badge
+                {% if current_user.is_admin == 1 %}
+                    badge-admin
+                {% elif current_user.account_type == 'test' %}
+                    badge-test
+                {% else %}
+                    badge-basic
+                {% endif %}
+            ">
+                {% if current_user.is_admin == 1 %}
+                    ADMIN
+                {% elif current_user.account_type == 'test' %}
+                    TEST
+                {% else %}
+                    BASIC
+                {% endif %}
+            </span>
+
+            <span style="font-size:13px; color:#cbd5e1;">
+                {{ current_user.email }}
+            </span>
+
+            <a href="{{ url_for('logout') }}">Ulos</a>
+        {% else %}
+            <a href="{{ url_for('login') }}">Kirjaudu</a>
+            <a href="{{ url_for('register') }}">Rekisteröidy</a>
         {% endif %}
-
-        {% if success %}
-            <div class="alert alert-success">{{ success }}</div>
-        {% endif %}
-
-        <form method="POST">
-            <div class="section">
-                <h3 class="section-title"><span class="section-badge">1</span> Perustiedot</h3>
-
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Koko nimi</label>
-                        <input class="form-input" name="full_name" placeholder="Matti Meikäläinen" required value="{{ full_name or '' }}">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Puhelin</label>
-                        <input class="form-input" name="phone" placeholder="+358 40 123 4567" required value="{{ phone or '' }}">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Sähköposti</label>
-                        <input class="form-input" name="email" type="email" placeholder="nimi@email.fi" required value="{{ email or '' }}">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Salasana</label>
-                        <input class="form-input" name="password" type="password" placeholder="Vähintään 6 merkkiä" required>
-                    </div>
-
-                    <div class="form-group full">
-                        <label>Vahvista salasana</label>
-                        <input class="form-input" name="password2" type="password" placeholder="Kirjoita salasana uudelleen" required>
-                    </div>
-                </div>
-            </div>
-
-            <div class="section">
-                <h3 class="section-title"><span class="section-badge">2</span> Osoite</h3>
-
-                <div class="form-grid">
-                    <div class="form-group full">
-                        <label>Lähiosoite</label>
-                        <input class="form-input" name="address_line1" placeholder="Katuosoite 1" required value="{{ address_line1 or '' }}">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Postinumero</label>
-                        <input class="form-input" name="postal_code" placeholder="00100" required value="{{ postal_code or '' }}">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Kaupunki</label>
-                        <input class="form-input" name="city" placeholder="Helsinki" required value="{{ city or '' }}">
-                    </div>
-
-                    <div class="form-group full">
-                        <label>Maa</label>
-                        <input class="form-input" name="country" placeholder="Suomi" required value="{{ country or 'Suomi' }}">
-                    </div>
-                </div>
-            </div>
-
-            <div class="section">
-                <h3 class="section-title"><span class="section-badge">3</span> Laskutus</h3>
-
-                <div class="form-grid">
-                    <div class="form-group full">
-                        <label>Asiakastyyppi</label>
-                        <select class="form-select" name="customer_type" id="customer_type" onchange="toggleCompany()">
-                            <option value="private" {% if (customer_type or 'private') == 'private' %}selected{% endif %}>Yksityinen</option>
-                            <option value="company" {% if customer_type == 'company' %}selected{% endif %}>Yritys</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div id="companyBox" class="company-box" style="display:none;">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>Yrityksen nimi</label>
-                            <input class="form-input" name="company_name" placeholder="Yritys Oy" value="{{ company_name or '' }}">
-                        </div>
-
-                        <div class="form-group">
-                            <label>ALV / Y-tunnus</label>
-                            <input class="form-input" name="vat_number" placeholder="1234567-8" value="{{ vat_number or '' }}">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="privacy-box">
-                <input type="checkbox" name="accept_privacy" value="yes" required {% if accept_privacy %}checked{% endif %}>
-                <div>
-                    Hyväksyn <a href="{{ url_for('privacy') }}">tietosuojaselosteen</a> ja ymmärrän, että palvelu tallentaa käyttäjätilin sekä diagnoosihistorian.
-                </div>
-            </div>
-
-            <div class="actions">
-                <button class="submit-btn" type="submit">Luo tili</button>
-
-                <div class="login-link">
-                    Onko sinulla jo tili? <a href="{{ url_for('login') }}">Kirjaudu sisään</a>
-                </div>
-            </div>
-        </form>
     </div>
 </div>
 
-<script>
-function toggleCompany() {
-    const type = document.getElementById("customer_type").value;
-    document.getElementById("companyBox").style.display = type === "company" ? "block" : "none";
-}
-toggleCompany();
-</script>
-{% endblock %}
+<div class="content">
+    {% block content %}{% endblock %}
+</div>
+
+</body>
+</html>
+```
