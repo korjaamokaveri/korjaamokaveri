@@ -1,8 +1,14 @@
 from flask import Flask, render_template_string
-from services.user_service import make_user_admin, update_user_password
+
+from dotenv import load_dotenv
+
 from db_init import init_db
 from services.diagnostics_service import diagnose
-from services.user_service import make_user_admin
+from services.user_service import (
+    make_user_admin,
+    update_user_password,
+    get_user_by_email,
+)
 from routes.admin_routes import admin_bp
 from routes.admin_repair_guide_routes import admin_repair_guides_bp
 from routes.main_routes import register_main_routes
@@ -10,13 +16,9 @@ from routes.auth_routes import register_auth_routes
 from routes.history_routes import register_history_routes
 from utils.auth import get_current_user
 from utils.config import Config
-from dotenv import load_dotenv
-from services.user_service import (
-    make_user_admin,
-    update_user_password,
-    get_user_by_email,
-)
+
 load_dotenv()
+
 
 LOGOUT_PAGE = """
 <!doctype html>
@@ -58,29 +60,30 @@ def create_app():
     @app.context_processor
     def inject_user():
         return dict(current_user=get_current_user())
-        
+
     @app.route("/fix-admin-temp")
     def fix_admin_temp():
         email = "ville_salovaara@hotmail.com"
         user = get_user_by_email(email)
 
         if not user:
-            return "Admin-käyttäjää ei löydy"
+            return "Admin-käyttäjää ei löydy. Rekisteröi ensin ville_salovaara@hotmail.com"
 
         update_user_password(user["id"], "Testi12345")
         make_user_admin(email)
 
-        return "Admin korjattu"  
-        
-    @app.route("/")
-    def home():
-        return "Korjaamo Kaveri toimii 🚀"
+        return "Admin korjattu. Kirjaudu: ville_salovaara@hotmail.com / Testi12345"
 
     @app.route("/logged-out")
     def logged_out():
         return render_template_string(LOGOUT_PAGE)
-        
+
+    @app.route("/health")
+    def health():
+        return "OK", 200
+
     return app
+
 
 def cli_test():
     print("=== Korjaamo Kaveri CLI-testi ===")
@@ -128,10 +131,6 @@ def cli_test():
 
 
 app = create_app()
-
-@app.route("/health")
-def health():
-    return "OK", 200
 
 
 if __name__ == "__main__":
