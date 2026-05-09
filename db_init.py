@@ -1,16 +1,131 @@
 import csv
+import os
+import re
 import sqlite3
+
+import psycopg2
+import psycopg2.extras
+from psycopg2 import errors
+
 from utils.config import Config
 
 DB_PATH = Config.DB_PATH
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+
+class PostgresCursor:
+    def __init__(self, cursor):
+        self.cursor = cursor
+        self.lastrowid = None
+
+    @property
+    def rowcount(self):
+        return self.cursor.rowcount
+
+    def _convert_sql(self, sql):
+        sql = sql.replace("INTEGER PRIMARY KEY AUTOINCREMENT", "SERIAL PRIMARY KEY")
+        sql = sql.replace("DATETIME DEFAULT CURRENT_TIMESTAMP", "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+        sql = sql.replace("DATETIME", "TIMESTAMP")
+        sql = sql.replace("REAL", "DOUBLE PRECISION")
+        sql = sql.replace("?", "%s")
+
+        if "INSERT OR IGNORE INTO" in sql:
+            sql = sql.replace("INSERT OR IGNORE INTO", "INSERT INTO")
+            sql = sql.strip()
+            if "ON CONFLICT" not in sql.upper():
+                sql += " ON CONFLICT DO NOTHING"
+
+        return sql
+
+    def execute(self, sql, params=None):
+        params = params or ()
+
+        sql_converted = self._convert_sql(sql)
+
+        # Lisää RETURNING id yksittäisiin INSERT-lauseisiin, jotta lastrowid toimii.
+        stripped = sql_converted.strip().lower()
+        if (
+            stripped.startswith("insert into")
+            and "returning" not in stripped
+            and "on conflict do nothing" not in stripped
+        ):
+            sql_converted = sql_converted.rstrip().rstrip(";") + " RETURNING id"
+
+        if (
+            stripped.startswith("insert into")
+            and "on conflict do nothing" in stripped
+            and "returning" not in stripped
+        ):
+            sql_converted = sql_converted.rstrip().rstrip(";") + " RETURNING id"
+
+        try:
+            self.cursor.execute(sql_converted, params)
+
+            self.lastrowid = None
+            if sql_converted.strip().lower().startswith("insert into") and "returning id" in sql_converted.lower():
+                row = self.cursor.fetchone()
+                if row:
+                    self.lastrowid = row["id"]
+
+        except errors.DuplicateColumn:
+            raise sqlite3.OperationalError("duplicate column")
+
+        except errors.DuplicateTable:
+            raise sqlite3.OperationalError("duplicate table")
+
+        except errors.DuplicateObject:
+            raise sqlite3.OperationalError("duplicate object")
+
+        return self
+
+    def executemany(self, sql, seq_of_params):
+        sql_converted = self._convert_sql(sql)
+
+        if "INSERT OR IGNORE INTO" in sql:
+            sql_converted = sql_converted.replace("INSERT OR IGNORE INTO", "INSERT INTO")
+            sql_converted = sql_converted.strip()
+            if "ON CONFLICT" not in sql_converted.upper():
+                sql_converted += " ON CONFLICT DO NOTHING"
+
+        try:
+            self.cursor.executemany(sql_converted, seq_of_params)
+        except errors.DuplicateColumn:
+            raise sqlite3.OperationalError("duplicate column")
+
+        return self
+
+    def fetchone(self):
+        return self.cursor.fetchone()
+
+    def fetchall(self):
+        return self.cursor.fetchall()
+
+
+class PostgresConnection:
+    def __init__(self, conn):
+        self.conn = conn
+
+    def cursor(self):
+        return PostgresCursor(
+            self.conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        )
+
+    def commit(self):
+        self.conn.commit()
+
+    def close(self):
+        self.conn.close()
 
 
 def get_connection():
+    if DATABASE_URL:
+        conn = psycopg2.connect(DATABASE_URL)
+        return PostgresConnection(conn)
+
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
-
-
+    
 def seed_data():
     conn = get_connection()
     cur = conn.cursor()
