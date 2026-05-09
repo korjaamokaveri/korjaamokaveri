@@ -11,6 +11,11 @@ from routes.history_routes import register_history_routes
 from utils.auth import get_current_user
 from utils.config import Config
 from dotenv import load_dotenv
+from services.user_service import (
+    make_user_admin,
+    update_user_password,
+    get_user_by_email,
+)
 load_dotenv()
 
 LOGOUT_PAGE = """
