@@ -69,13 +69,20 @@ class PostgresCursor:
                     self.lastrowid = row["id"]
 
         except errors.DuplicateColumn:
+            self.conn.rollback()
             raise sqlite3.OperationalError("duplicate column")
 
         except errors.DuplicateTable:
+            self.conn.rollback()
             raise sqlite3.OperationalError("duplicate table")
 
         except errors.DuplicateObject:
+            self.conn.rollback()
             raise sqlite3.OperationalError("duplicate object")
+
+        except psycopg2.Error as e:
+            self.conn.rollback()
+            raise e
 
         return self
 
