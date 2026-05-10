@@ -113,23 +113,43 @@ def register_auth_routes(app):
             email = request.form.get("email", "").strip().lower()
             password = request.form.get("password", "")
 
+            print(f"LOGIN DEBUG: email={email}")
+
             user = get_user_by_email(email)
 
             if not user:
+                print("LOGIN DEBUG: käyttäjää ei löydy")
                 error = "Käyttäjää ei löydy tietokannasta."
+
             elif not check_password_hash(user["password_hash"], password):
+                print("LOGIN DEBUG: salasana väärä")
                 error = "Salasana on väärä."
+
             else:
+                session.clear()
                 session["user_id"] = user["id"]
+                session.permanent = True
+
+                print(
+                    f"LOGIN DEBUG: onnistui user_id={user['id']} "
+                    f"is_admin={user['is_admin']} session_user_id={session.get('user_id')}"
+                )
+
                 set_user_online(user["id"])
 
                 if user["is_admin"] == 1:
+                    print("LOGIN DEBUG: ohjataan adminiin")
                     return redirect(url_for("admin.admin"))
 
+                print("LOGIN DEBUG: ohjataan app_homeen")
                 return redirect(url_for("app_home"))
 
-        return render_template("login.html", error=error, email=email)
-
+        return render_template(
+            "login.html",
+            error=error,
+            email=email,
+        )
+        
     @app.route("/forgot-password", methods=["GET", "POST"])
     def forgot_password():
         error = None
