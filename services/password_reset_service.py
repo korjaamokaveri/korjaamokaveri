@@ -1,4 +1,6 @@
 import secrets
+from datetime import datetime, timedelta, timezone
+
 from db_init import get_connection
 
 
@@ -7,11 +9,12 @@ def create_password_reset_token(user_id: int):
     cur = conn.cursor()
 
     token = secrets.token_urlsafe(32)
+    expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
 
     cur.execute("""
         INSERT INTO password_reset_tokens (user_id, token, expires_at)
-        VALUES (?, ?, datetime('now', '+1 hour'))
-    """, (user_id, token))
+        VALUES (?, ?, ?)
+    """, (user_id, token, expires_at))
 
     conn.commit()
     conn.close()
