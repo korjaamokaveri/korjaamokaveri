@@ -11,7 +11,7 @@ from utils.config import Config
 
 DB_PATH = Config.DB_PATH
 DATABASE_URL = os.getenv("DATABASE_URL")
-
+print("DATABASE_URL EXISTS:", bool(DATABASE_URL))
 
 class PostgresCursor:
     def __init__(self, cursor, conn):
