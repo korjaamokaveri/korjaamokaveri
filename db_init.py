@@ -136,6 +136,9 @@ def get_connection():
         conn = psycopg2.connect(DATABASE_URL)
         return PostgresConnection(conn)
 
+    if os.getenv("RENDER"):
+        raise RuntimeError("DATABASE_URL puuttuu Renderissä. Tuotanto ei saa käyttää SQLiteä.")
+
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
