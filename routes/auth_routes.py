@@ -150,8 +150,8 @@ def register_auth_routes(app):
                 user = get_user_by_email(email)
 
                 if user:
-    token = create_password_reset_token(user["id"])
-    reset_link = url_for("reset_password", token=token, _external=True)
+                    token = create_password_reset_token(user["id"])
+                    reset_link = url_for("reset_password", token=token, _external=True)
 
     send_email(
         to_email=email,
