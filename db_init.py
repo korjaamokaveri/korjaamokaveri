@@ -557,7 +557,9 @@ def init_db():
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
     """)
-
+    
+    conn.commit()
+    
     try:
         cur.execute("ALTER TABLE users ADD COLUMN last_active_at DATETIME")
     except sqlite3.OperationalError:
