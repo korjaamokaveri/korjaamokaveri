@@ -134,8 +134,8 @@ def register_auth_routes(app):
             email=email,
         )
 
-    @app.route("/forgot-password", methods=["GET", "POST"])
-    def forgot_password():
+        @app.route("/forgot-password", methods=["GET", "POST"])
+        def forgot_password():
         error = None
         success = None
         email = ""
@@ -149,14 +149,10 @@ def register_auth_routes(app):
                 user = get_user_by_email(email)
 
                 if user:
-                    print(f"PASSWORD RESET: käyttäjä löytyi {email}")
-
                     token = create_password_reset_token(user["id"])
                     reset_link = url_for("reset_password", token=token, _external=True)
 
-                    print(f"PASSWORD RESET: yritetään lähettää sähköposti {email}")
-
-                    email_sent = send_email(
+                    send_email(
                         to_email=email,
                         subject="Korjaamo Kaveri - salasanan vaihto",
                         body=f"""Hei,
@@ -167,18 +163,19 @@ Voit vaihtaa Korjaamo Kaveri -salasanasi tästä linkistä:
 
 Linkki on voimassa yhden tunnin.
 
-Jos et pyytänyt salasanan vaihtoa, voit jättää tämän viestin huomiotta.
-
 Terveisin,
 Korjaamo Kaveri
 """
                     )
 
-                    print(f"PASSWORD RESET: email_sent={email_sent}")
-                else:
-                    print(f"PASSWORD RESET: käyttäjää ei löytynyt {email}")
+                success = "Jos sähköposti löytyy järjestelmästä, salasanan vaihtolinkki on lähetetty."
 
-                success = "Jos sähköposti löytyy järjestelmästä, lähetimme salasanan vaihtolinkin sähköpostiin."
+                return render_template(
+                    "forgot_password.html",
+                    error=error,
+                    success=success,
+                    email="",
+                )
 
         return render_template(
             "forgot_password.html",
