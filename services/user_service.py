@@ -294,7 +294,6 @@ def set_user_offline(user_id: int):
     conn.commit()
     conn.close()
 
-
 def get_all_users_with_stats():
     conn = get_connection()
     cur = conn.cursor()
@@ -321,12 +320,12 @@ def get_all_users_with_stats():
             u.last_active_at,
             u.is_online,
             COUNT(sd.id) AS diagnosis_count,
-            COALESCE(SUM(
+            COUNT(
                 CASE
-                    WHEN json_extract(sd.result_json, '$.unknown_code') = 1 THEN 1
-                    ELSE 0
+                    WHEN sd.requires_resolution_image = 1 THEN 1
+                    ELSE NULL
                 END
-            ), 0) AS ticket_count
+            ) AS ticket_count
         FROM users u
         LEFT JOIN saved_diagnoses sd ON sd.user_id = u.id
         GROUP BY
@@ -355,3 +354,4 @@ def get_all_users_with_stats():
     rows = cur.fetchall()
     conn.close()
     return rows
+
