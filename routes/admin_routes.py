@@ -1,637 +1,414 @@
-import os
-import time
-import sqlite3
-from collections import OrderedDict
+from flask import render_template, request, redirect, url_for, session, jsonify
+from werkzeug.security import check_password_hash
 
-from flask import Blueprint, render_template, request, redirect, url_for, current_app
-from werkzeug.utils import secure_filename
-
-from decorators import admin_required, get_current_user
-from utils.import_pdf_dtc import import_pdf
-
-from services.fault_code_service import (
-    get_all_fault_codes,
-    create_fault_code_with_details,
-    delete_fault_code,
-    get_fault_code_by_id,
-    update_fault_code_with_details,
-    find_fault_code,
-)
-
-from services.ticket_service import (
-    get_open_diagnoses,
-    get_unknown_code_tickets,
-    get_all_diagnoses,
-    get_diagnosis_by_id,
-    get_diagnosis_admin_detail,
-    close_diagnosis_as_admin,
-    update_diagnosis_result,
-    create_fault_code_from_ticket,
-)
-
+from services.email_service import send_email
 from services.user_service import (
-    get_all_users_with_stats,
-    get_user_by_id,
-    set_user_admin_by_id,
-    delete_user_by_id,
-    count_admin_users,
-    set_user_account_type,
-    set_user_subscription,
+    get_user_by_email,
+    create_user,
+    set_user_online,
+    set_user_offline,
+    update_user_password,
 )
-
-from services.suggestion_service import (
-    list_suggested_updates,
-    approve_suggested_update,
-    reject_suggested_update,
-    create_ai_enrichment_suggestions,
-)
-
-from services.accounting_service import (
-    get_all_accounting_entries,
-    get_accounting_summary,
+from services.password_reset_service import (
+    create_password_reset_token,
+    get_valid_password_reset_token,
+    mark_password_reset_token_used,
+    invalidate_user_reset_tokens,
 )
 
 
-admin_bp = Blueprint("admin", __name__)
+def register_auth_routes(app):
+    def empty_form_data():
+        return {
+            "email": "",
+            "full_name": "",
+            "phone": "",
+            "address_line1": "",
+            "postal_code": "",
+            "city": "",
+            "country": "Suomi",
+            "customer_type": "private",
+            "company_name": "",
+            "vat_number": "",
+            "accept_privacy": False,
+        }
 
-ALLOWED_IMAGE_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
+    @app.route("/register", methods=["GET", "POST"])
+    def register():
+        error = None
+        success = None
+        form_data = empty_form_data()
 
+        if request.method == "POST":
+            form_data["email"] = request.form.get("email", "").strip().lower()
+            form_data["full_name"] = request.form.get("full_name", "").strip()
+            form_data["phone"] = request.form.get("phone", "").strip()
+            form_data["address_line1"] = request.form.get("address_line1", "").strip()
+            form_data["postal_code"] = request.form.get("postal_code", "").strip()
+            form_data["city"] = request.form.get("city", "").strip()
+            form_data["country"] = request.form.get("country", "").strip() or "Suomi"
+            form_data["customer_type"] = request.form.get("customer_type", "private").strip().lower()
+            form_data["company_name"] = request.form.get("company_name", "").strip()
+            form_data["vat_number"] = request.form.get("vat_number", "").strip()
+            form_data["accept_privacy"] = request.form.get("accept_privacy") == "yes"
 
-def allowed_image_file(filename: str) -> bool:
-    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_IMAGE_EXTENSIONS
+            password = request.form.get("password", "")
+            password2 = request.form.get("password2", "")
 
+            if form_data["customer_type"] not in {"private", "company"}:
+                form_data["customer_type"] = "private"
 
-def save_resolution_image(file_storage, diagnosis_id: int):
-    if not file_storage or not file_storage.filename:
-        return None
-
-    if not allowed_image_file(file_storage.filename):
-        return None
-
-    filename = secure_filename(file_storage.filename)
-    filename = f"ticket_{diagnosis_id}_{int(time.time())}_{filename}"
-
-    upload_folder = os.path.join(current_app.static_folder, "uploads", "tickets")
-    os.makedirs(upload_folder, exist_ok=True)
-
-    save_path = os.path.join(upload_folder, filename)
-    file_storage.save(save_path)
-
-    return f"uploads/tickets/{filename}"
-
-
-def group_by_system(codes):
-    grouped = OrderedDict({
-        "P": [],
-        "B": [],
-        "C": [],
-        "U": [],
-        "Other": [],
-    })
-
-    for item in codes:
-        code = (item["code"] or "").upper()
-
-        if code.startswith("P"):
-            grouped["P"].append(item)
-        elif code.startswith("B"):
-            grouped["B"].append(item)
-        elif code.startswith("C"):
-            grouped["C"].append(item)
-        elif code.startswith("U"):
-            grouped["U"].append(item)
-        else:
-            grouped["Other"].append(item)
-
-    return grouped
-
-
-def group_fault_codes_by_make(fault_codes):
-    grouped = OrderedDict()
-
-    for row in fault_codes:
-        try:
-            make = (row["make"] or "").strip()
-        except Exception:
-            make = ""
-
-        if not make:
-            make = "Yleinen"
-
-        if make not in grouped:
-            grouped[make] = []
-
-        grouped[make].append(row)
-
-    for make in grouped:
-        grouped[make] = group_by_system(grouped[make])
-
-    return grouped
-
-
-@admin_bp.route("/admin", methods=["GET", "POST"])
-@admin_required
-def admin():
-    error = None
-    success = request.args.get("success")
-
-    if request.method == "POST":
-        code = request.form.get("code", "").strip()
-        make = request.form.get("make", "").strip()
-        title = request.form.get("title", "").strip()
-        description = request.form.get("description", "").strip()
-        problem_symptoms = request.form.get("problem_symptoms", "").strip()
-        mil_status = request.form.get("mil_status", "").strip()
-        fail_safe_function = request.form.get("fail_safe_function", "").strip()
-        priority = request.form.get("priority", "").strip()
-        sae_code = request.form.get("sae_code", "").strip()
-        causes = request.form.get("causes", "").strip()
-        steps = request.form.get("steps", "").strip()
-        ticket_id = request.form.get("ticket_id", "").strip()
-
-        if not code or not title or not description:
-            error = "Täytä vähintään DTC, otsikko ja kuvaus."
-        else:
-            try:
-                create_fault_code_with_details(
-                    code=code,
-                    make=make,
-                    title=title,
-                    description=description,
-                    causes_text=causes,
-                    steps_text=steps,
-                    problem_symptoms=problem_symptoms,
-                    mil_status=mil_status,
-                    fail_safe_function=fail_safe_function,
-                    priority=priority,
-                    sae_code=sae_code,
+            if (
+                not form_data["email"]
+                or not form_data["full_name"]
+                or not form_data["phone"]
+                or not form_data["address_line1"]
+                or not form_data["postal_code"]
+                or not form_data["city"]
+                or not form_data["country"]
+                or not password
+                or not password2
+            ):
+                error = "Täytä kaikki pakolliset kentät."
+            elif password != password2:
+                error = "Salasanat eivät täsmää."
+            elif len(password) < 6:
+                error = "Salasanan pitää olla vähintään 6 merkkiä."
+            elif not form_data["accept_privacy"]:
+                error = "Hyväksy tietosuojaseloste."
+            elif form_data["customer_type"] == "company" and not form_data["company_name"]:
+                error = "Yritysasiakkaalle yrityksen nimi on pakollinen."
+            elif get_user_by_email(form_data["email"]):
+                error = "Tällä sähköpostilla on jo tili."
+            else:
+                create_user(
+                    email=form_data["email"],
+                    password=password,
+                    full_name=form_data["full_name"],
+                    phone=form_data["phone"],
+                    address_line1=form_data["address_line1"],
+                    postal_code=form_data["postal_code"],
+                    city=form_data["city"],
+                    country=form_data["country"],
+                    customer_type=form_data["customer_type"],
+                    company_name=form_data["company_name"],
+                    vat_number=form_data["vat_number"],
                 )
-
-                row = find_fault_code(code)
-
-                if row:
-                    create_ai_enrichment_suggestions(row["id"])
-
-                if ticket_id and row:
-                    updated_result = {
-                        "success": True,
-                        "unknown_code": False,
-                        "fault_code": row["code"],
-                        "title": row["title"],
-                        "description": row["description"],
-                        "problem_symptoms": row["problem_symptoms"] or "",
-                        "mil_status": row["mil_status"] or "",
-                        "fail_safe_function": row["fail_safe_function"] or "",
-                        "priority": row["priority"] or "",
-                        "sae_code": row["sae_code"] or "",
-                        "vehicle": {
-                            "make": "",
-                            "model": "",
-                            "engine": "",
-                        },
-                        "matched_symptoms": [],
-                        "symptom_notes": [],
-                        "vehicle_notes": [],
-                        "possible_causes": [],
-                        "test_steps": [],
-                        "top_solution": None,
-                        "top_solution_with_image": None,
-                    }
-
-                    update_diagnosis_result(int(ticket_id), updated_result)
-
-                return redirect(url_for("admin.admin", success=f"DTC {code.upper()} tallennettu."))
-
-            except sqlite3.IntegrityError:
-                error = "Tämä DTC on jo olemassa."
-
-    fault_codes = get_all_fault_codes()
-    grouped_fault_codes = group_fault_codes_by_make(fault_codes)
-
-    return render_template(
-        "admin.html",
-        error=error,
-        success=success,
-        fault_codes=fault_codes,
-        grouped_fault_codes=grouped_fault_codes,
-        prefill=None,
-    )
-
-
-@admin_bp.route("/admin/edit/<int:fault_code_id>", methods=["GET", "POST"])
-@admin_required
-def edit_fault_code_route(fault_code_id):
-    item = get_fault_code_by_id(fault_code_id)
-
-    if not item:
-        return "DTC:tä ei löytynyt", 404
-
-    error = None
-
-    if request.method == "POST":
-        code = request.form.get("code", "").strip()
-        make = request.form.get("make", "").strip()
-        title = request.form.get("title", "").strip()
-        description = request.form.get("description", "").strip()
-        problem_symptoms = request.form.get("problem_symptoms", "").strip()
-        mil_status = request.form.get("mil_status", "").strip()
-        fail_safe_function = request.form.get("fail_safe_function", "").strip()
-        priority = request.form.get("priority", "").strip()
-        sae_code = request.form.get("sae_code", "").strip()
-        causes = request.form.get("causes", "").strip()
-        steps = request.form.get("steps", "").strip()
-
-        if not code or not title or not description:
-            error = "Täytä vähintään DTC, otsikko ja kuvaus."
-        else:
-            try:
-                update_fault_code_with_details(
-                    fault_code_id=fault_code_id,
-                    code=code,
-                    make=make,
-                    title=title,
-                    description=description,
-                    causes_text=causes,
-                    steps_text=steps,
-                    problem_symptoms=problem_symptoms,
-                    mil_status=mil_status,
-                    fail_safe_function=fail_safe_function,
-                    priority=priority,
-                    sae_code=sae_code,
-                )
-
-                create_ai_enrichment_suggestions(fault_code_id)
-
-                return redirect(
-                    url_for("admin.admin", success=f"DTC {code.upper()} päivitetty.")
-                    + f"#fault-{fault_code_id}"
-                )
-
-            except sqlite3.IntegrityError:
-                error = "Tämä DTC on jo olemassa."
-
-        item = get_fault_code_by_id(fault_code_id)
-
-    return render_template(
-        "admin_edit.html",
-        item=item,
-        error=error,
-        success=None,
-    )
-
-
-@admin_bp.route("/admin/delete/<int:fault_code_id>", methods=["POST"])
-@admin_required
-def delete_fault_code_route(fault_code_id):
-    delete_fault_code(fault_code_id)
-    return redirect(url_for("admin.admin", success="DTC poistettu."))
-
-
-@admin_bp.route("/admin/import-dtc-pdf", methods=["POST"])
-@admin_required
-def admin_import_dtc_pdf():
-    pdf_file = request.files.get("pdf_file")
-    make = request.form.get("make", "Yleinen").strip() or "Yleinen"
-
-    if not pdf_file or not pdf_file.filename:
-        return redirect(url_for("admin.admin", success="PDF-tiedosto puuttuu."))
-
-    if not pdf_file.filename.lower().endswith(".pdf"):
-        return redirect(url_for("admin.admin", success="Vain PDF-tiedostot sallitaan."))
-
-    filename = secure_filename(pdf_file.filename)
-    upload_folder = os.path.join(current_app.instance_path, "imports")
-    os.makedirs(upload_folder, exist_ok=True)
-
-    save_path = os.path.join(upload_folder, filename)
-    pdf_file.save(save_path)
-
-    import_pdf(save_path, make)
-
-    return redirect(url_for(
-        "admin.admin",
-        success=f"PDF-import valmis merkille {make}."
-    ))
-
-
-@admin_bp.route("/admin/tickets")
-@admin_required
-def admin_tickets():
-    return render_template(
-        "admin_tickets.html",
-        tickets=get_open_diagnoses(),
-        success=request.args.get("success"),
-    )
-
-
-@admin_bp.route("/admin/unknown-tickets")
-@admin_required
-def admin_unknown_tickets():
-    return render_template(
-        "admin_unknown_tickets.html",
-        tickets=get_unknown_code_tickets(),
-        success=request.args.get("success"),
-    )
-
-
-@admin_bp.route("/admin/all-tickets")
-@admin_required
-def admin_all_tickets():
-    q = request.args.get("q", "").strip()
-    status = request.args.get("status", "").strip()
-
-    return render_template(
-        "admin_all_tickets.html",
-        tickets=get_all_diagnoses(search=q, status=status),
-        q=q,
-        status=status,
-    )
-
-
-@admin_bp.route("/admin/ticket/<int:diagnosis_id>")
-@admin_required
-def admin_ticket_detail(diagnosis_id):
-    item = get_diagnosis_admin_detail(diagnosis_id)
-
-    if not item:
-        return "Tikettiä ei löytynyt", 404
-
-    return render_template("admin_ticket_detail.html", item=item)
-
-
-@admin_bp.route("/admin/users")
-@admin_required
-def admin_users():
-    return render_template("admin_users.html", users=get_all_users_with_stats())
-
-
-@admin_bp.route("/admin/accounting")
-@admin_required
-def admin_accounting():
-    items = get_all_accounting_entries()
-    summary, grouped = get_accounting_summary()
-
-    return render_template(
-        "admin_accounting.html",
-        items=items,
-        summary=summary,
-        grouped=grouped,
-    )
-
-
-@admin_bp.route("/admin/users/<int:user_id>/make-admin", methods=["POST"])
-@admin_required
-def admin_make_user_admin(user_id):
-    current_user = get_current_user()
-    target_user = get_user_by_id(user_id)
-
-    if not target_user:
-        return redirect(url_for("admin.admin_users"))
-
-    if current_user["id"] == user_id:
-        return redirect(url_for("admin.admin_users"))
-
-    set_user_admin_by_id(user_id, True)
-    return redirect(url_for("admin.admin_users"))
-
-
-@admin_bp.route("/admin/users/<int:user_id>/make-basic", methods=["POST"])
-@admin_required
-def admin_make_user_basic(user_id):
-    current_user = get_current_user()
-    target_user = get_user_by_id(user_id)
-
-    if not target_user:
-        return redirect(url_for("admin.admin_users"))
-
-    if current_user["id"] == user_id:
-        return redirect(url_for("admin.admin_users"))
-
-    if target_user["is_admin"] == 1 and count_admin_users() <= 1:
-        return redirect(url_for("admin.admin_users"))
-
-    set_user_admin_by_id(user_id, False)
-    return redirect(url_for("admin.admin_users"))
-
-
-@admin_bp.route("/admin/users/<int:user_id>/set-account-type", methods=["POST"])
-@admin_required
-def admin_set_account_type(user_id):
-    target_user = get_user_by_id(user_id)
-
-    if not target_user:
-        return redirect(url_for("admin.admin_users"))
-
-    account_type = request.form.get("account_type", "basic").strip().lower()
-    subscription_status = request.form.get("subscription_status", "inactive").strip().lower()
-
-    if account_type not in {"basic", "test"}:
-        account_type = "basic"
-
-    if subscription_status not in {"inactive", "active", "cancelled", "past_due"}:
-        subscription_status = "inactive"
-
-    set_user_account_type(user_id, account_type)
-
-    if account_type == "test":
-        set_user_subscription(
-            user_id=user_id,
-            subscription_status="inactive",
-            subscription_started_at=None,
-            subscription_expires_at=None,
-        )
-    else:
-        set_user_subscription(
-            user_id=user_id,
-            subscription_status=subscription_status,
-            subscription_started_at=None,
-            subscription_expires_at=None,
+                success = "Rekisteröinti onnistui. Voit nyt kirjautua sisään."
+                form_data = empty_form_data()
+
+        return render_template(
+            "register.html",
+            error=error,
+            success=success,
+            **form_data,
         )
 
-    return redirect(url_for("admin.admin_users"))
+    @app.route("/login", methods=["GET", "POST"])
+    def login():
+        error = None
+        email = ""
 
+        if request.method == "POST":
+            email = request.form.get("email", "").strip().lower()
+            password = request.form.get("password", "")
 
-@admin_bp.route("/admin/users/<int:user_id>/delete", methods=["POST"])
-@admin_required
-def admin_delete_user(user_id):
-    current_user = get_current_user()
-    target_user = get_user_by_id(user_id)
+            user = get_user_by_email(email)
 
-    if not target_user:
-        return redirect(url_for("admin.admin_users"))
+            if not user:
+                error = "Käyttäjää ei löydy tietokannasta."
+            elif not check_password_hash(user["password_hash"], password):
+                error = "Salasana on väärä."
+            else:
+                session["user_id"] = user["id"]
+                set_user_online(user["id"])
 
-    if current_user["id"] == user_id:
-        return redirect(url_for("admin.admin_users"))
+                if user["is_admin"] == 1:
+                    return redirect(url_for("admin.admin"))
 
-    if target_user["is_admin"] == 1 and count_admin_users() <= 1:
-        return redirect(url_for("admin.admin_users"))
+                return redirect(url_for("app_home"))
 
-    delete_user_by_id(user_id)
-    return redirect(url_for("admin.admin_users"))
+        return render_template("login.html", error=error, email=email)
 
+    @app.route("/forgot-password", methods=["GET", "POST"])
+    def forgot_password():
+        error = None
+        success = None
+        email = ""
 
-@admin_bp.route("/admin/suggestions")
-@admin_required
-def admin_suggestions():
-    success = request.args.get("success")
-    status = request.args.get("status", "pending").strip()
-    items = list_suggested_updates(status=status)
+        if request.method == "POST":
+            email = request.form.get("email", "").strip().lower()
 
-    return render_template(
-        "admin_suggestions.html",
-        items=items,
-        status=status,
-        success=success,
-    )
+            if not email:
+                error = "Anna sähköposti."
+            else:
+                user = get_user_by_email(email)
 
+                if user:
+                    token = create_password_reset_token(user["id"])
+                    reset_link = url_for("reset_password", token=token, _external=True)
 
-@admin_bp.route("/admin/suggestions/<int:suggestion_id>/approve", methods=["POST"])
-@admin_required
-def approve_suggestion_route(suggestion_id):
-    current_user = get_current_user()
-    admin_note = request.form.get("admin_note", "").strip()
+                    email_sent = send_email(
+                        to_email=email,
+                        subject="Korjaamo Kaveri - salasanan vaihto",
+                        body=f"""Hei,
 
-    ok, message = approve_suggested_update(
-        suggestion_id=suggestion_id,
-        reviewed_by_user_id=current_user["id"],
-        admin_note=admin_note,
-    )
+Voit vaihtaa Korjaamo Kaveri -salasanasi tästä linkistä:
 
-    return redirect(url_for("admin.admin_suggestions", success=message))
+{reset_link}
 
+Linkki on voimassa yhden tunnin.
 
-@admin_bp.route("/admin/suggestions/<int:suggestion_id>/reject", methods=["POST"])
-@admin_required
-def reject_suggestion_route(suggestion_id):
-    current_user = get_current_user()
-    admin_note = request.form.get("admin_note", "").strip()
+Jos et pyytänyt salasanan vaihtoa, voit jättää tämän viestin huomiotta.
 
-    ok, message = reject_suggested_update(
-        suggestion_id=suggestion_id,
-        reviewed_by_user_id=current_user["id"],
-        admin_note=admin_note,
-    )
+Terveisin,
+Korjaamo Kaveri
+"""
+                    )
 
-    return redirect(url_for("admin.admin_suggestions", success=message))
+                    print(f"PASSWORD RESET: email_sent={email_sent} email={email}")
+                else:
+                    print(f"PASSWORD RESET: käyttäjää ei löytynyt {email}")
 
+                success = "Jos sähköposti löytyy järjestelmästä, salasanan vaihtolinkki on lähetetty."
 
-@admin_bp.route("/admin/create-from-ticket/<int:diagnosis_id>", methods=["GET"])
-@admin_required
-def create_from_ticket(diagnosis_id):
-    row = get_diagnosis_by_id(diagnosis_id)
+                return render_template(
+                    "forgot_password.html",
+                    error=error,
+                    success=success,
+                    email="",
+                )
 
-    if not row:
-        return "Tikettiä ei löytynyt", 404
+        return render_template(
+            "forgot_password.html",
+            error=error,
+            success=success,
+            email=email,
+        )
 
-    fault_codes = get_all_fault_codes()
-    grouped_fault_codes = group_fault_codes_by_make(fault_codes)
+    @app.route("/reset-password/<token>", methods=["GET", "POST"])
+    def reset_password(token):
+        error = None
+        success = None
 
-    return render_template(
-        "admin.html",
-        error=None,
-        success=None,
-        fault_codes=fault_codes,
-        grouped_fault_codes=grouped_fault_codes,
-        prefill={
-            "code": row["code"],
-            "make": row["make"] or "Yleinen",
-            "title": "",
-            "description": f"Automaattisesti luotu tiketin perusteella ({row['make']} {row['model']})",
-            "problem_symptoms": row["symptoms"] or "",
-            "mil_status": "",
-            "fail_safe_function": "",
-            "priority": "",
-            "sae_code": "",
-            "causes": "",
-            "steps": "",
-            "ticket_id": row["id"],
-        },
-    )
+        token_row = get_valid_password_reset_token(token)
 
-
-@admin_bp.route("/admin/answer/<int:diagnosis_id>", methods=["POST"])
-@admin_required
-def admin_answer_ticket(diagnosis_id):
-    final_cause = request.form.get("final_cause", "").strip()
-    final_fix = request.form.get("final_fix", "").strip()
-    notes = request.form.get("notes", "").strip()
-
-    create_fault_code = request.form.get("create_fault_code", "").strip() == "yes"
-    new_title = request.form.get("new_title", "").strip()
-    new_description = request.form.get("new_description", "").strip()
-
-    if not final_cause or not final_fix:
-        return redirect(url_for("admin.admin_unknown_tickets"))
-
-    row = get_diagnosis_by_id(diagnosis_id)
-    if not row:
-        return "Tikettiä ei löytynyt", 404
-
-    resolution_image = request.files.get("resolution_image")
-    resolution_image_path = save_resolution_image(resolution_image, diagnosis_id)
-
-    if resolution_image and resolution_image.filename and not resolution_image_path:
-        return redirect(
-            url_for(
-                "admin.admin_unknown_tickets",
-                success="Virhe: sallittuja kuvatyyppejä ovat jpg, jpeg, png ja webp."
+        if not token_row:
+            return render_template(
+                "reset_password.html",
+                error="Linkki on vanhentunut tai virheellinen.",
+                success=None,
+                token_valid=False,
+                token=token,
             )
+
+        if request.method == "POST":
+            password = request.form.get("password", "")
+            password2 = request.form.get("password2", "")
+
+            if not password or not password2:
+                error = "Täytä kaikki kentät."
+            elif password != password2:
+                error = "Salasanat eivät täsmää."
+            elif len(password) < 6:
+                error = "Salasanan pitää olla vähintään 6 merkkiä."
+            else:
+                update_user_password(token_row["user_id"], password)
+                invalidate_user_reset_tokens(token_row["user_id"])
+                mark_password_reset_token_used(token)
+
+                return render_template(
+                    "reset_password.html",
+                    error=None,
+                    success="Salasana vaihdettu onnistuneesti. Voit nyt kirjautua sisään.",
+                    token_valid=False,
+                    token=token,
+                )
+
+        return render_template(
+            "reset_password.html",
+            error=error,
+            success=success,
+            token_valid=True,
+            token=token,
         )
 
-    if create_fault_code:
-        if not new_title:
-            new_title = f"Adminin luoma DTC {row['code']}"
-        if not new_description:
-            new_description = f"Luotu ratkaistun tiketin perusteella ({row['make']} {row['model']})"
+    @app.route("/logout", methods=["GET"])
+    def logout():
+        user_id = session.get("user_id")
+        if user_id:
+            set_user_offline(user_id)
 
-        try:
-            create_fault_code_from_ticket(
-                code=row["code"],
-                make=row["make"],
-                title=new_title,
-                description=new_description,
-                final_cause=final_cause,
+        session.clear()
+        return redirect(url_for("login"))
+
+    @app.route("/api/register", methods=["POST"])
+    def api_register():
+        data = request.get_json(silent=True) or {}
+
+        email = data.get("email", "").strip().lower()
+        password = data.get("password", "")
+        password2 = data.get("password2", "")
+        full_name = data.get("full_name", "").strip()
+        phone = data.get("phone", "").strip()
+        address_line1 = data.get("address_line1", "").strip()
+        postal_code = data.get("postal_code", "").strip()
+        city = data.get("city", "").strip()
+        country = data.get("country", "").strip() or "Suomi"
+        customer_type = data.get("customer_type", "private").strip().lower()
+        company_name = data.get("company_name", "").strip()
+        vat_number = data.get("vat_number", "").strip()
+        accept_privacy = bool(data.get("accept_privacy", False))
+
+        if customer_type not in {"private", "company"}:
+            customer_type = "private"
+
+        if (
+            not email
+            or not password
+            or not password2
+            or not full_name
+            or not phone
+            or not address_line1
+            or not postal_code
+            or not city
+            or not country
+        ):
+            return jsonify({"success": False, "message": "Täytä kaikki pakolliset kentät."}), 400
+
+        if password != password2:
+            return jsonify({"success": False, "message": "Salasanat eivät täsmää."}), 400
+
+        if len(password) < 6:
+            return jsonify({"success": False, "message": "Salasanan pitää olla vähintään 6 merkkiä."}), 400
+
+        if not accept_privacy:
+            return jsonify({"success": False, "message": "Hyväksy tietosuojaseloste."}), 400
+
+        if customer_type == "company" and not company_name:
+            return jsonify({"success": False, "message": "Yritysasiakkaalle yrityksen nimi on pakollinen."}), 400
+
+        if get_user_by_email(email):
+            return jsonify({"success": False, "message": "Tällä sähköpostilla on jo tili."}), 409
+
+        create_user(
+            email=email,
+            password=password,
+            full_name=full_name,
+            phone=phone,
+            address_line1=address_line1,
+            postal_code=postal_code,
+            city=city,
+            country=country,
+            customer_type=customer_type,
+            company_name=company_name,
+            vat_number=vat_number,
+        )
+
+        return jsonify({"success": True, "message": "Rekisteröinti onnistui."}), 201
+
+    @app.route("/api/login", methods=["POST"])
+    def api_login():
+        data = request.get_json(silent=True) or {}
+
+        email = data.get("email", "").strip().lower()
+        password = data.get("password", "")
+
+        if not email or not password:
+            return jsonify({"success": False, "message": "Sähköposti ja salasana ovat pakollisia."}), 400
+
+        user = get_user_by_email(email)
+
+        if not user:
+            return jsonify({"success": False, "message": "Käyttäjää ei löydy tietokannasta."}), 401
+
+        if not check_password_hash(user["password_hash"], password):
+            return jsonify({"success": False, "message": "Salasana on väärä."}), 401
+
+        session["user_id"] = user["id"]
+        set_user_online(user["id"])
+
+        return jsonify({
+            "success": True,
+            "message": "Kirjautuminen onnistui.",
+            "user": {
+                "id": user["id"],
+                "email": user["email"],
+                "is_admin": user["is_admin"],
+            },
+        }), 200
+
+    @app.route("/api/forgot-password", methods=["POST"])
+    def api_forgot_password():
+        data = request.get_json(silent=True) or {}
+        email = data.get("email", "").strip().lower()
+
+        if not email:
+            return jsonify({"success": False, "message": "Anna sähköposti."}), 400
+
+        user = get_user_by_email(email)
+
+        if user:
+            token = create_password_reset_token(user["id"])
+            reset_link = url_for("reset_password", token=token, _external=True)
+
+            send_email(
+                to_email=email,
+                subject="Korjaamo Kaveri - salasanan vaihto",
+                body=f"""Hei,
+
+Voit vaihtaa Korjaamo Kaveri -salasanasi tästä linkistä:
+
+{reset_link}
+
+Linkki on voimassa yhden tunnin.
+
+Jos et pyytänyt salasanan vaihtoa, voit jättää tämän viestin huomiotta.
+
+Terveisin,
+Korjaamo Kaveri
+"""
             )
-        except sqlite3.IntegrityError:
-            pass
 
-        fault = find_fault_code(row["code"])
-        if fault:
-            create_ai_enrichment_suggestions(fault["id"])
+        return jsonify({
+            "success": True,
+            "message": "Jos sähköposti löytyy järjestelmästä, salasanan vaihtolinkki on lähetetty.",
+        }), 200
 
-            updated_result = {
-                "success": True,
-                "unknown_code": False,
-                "fault_code": fault["code"],
-                "title": fault["title"],
-                "description": fault["description"],
-                "problem_symptoms": fault["problem_symptoms"] or "",
-                "mil_status": fault["mil_status"] or "",
-                "fail_safe_function": fault["fail_safe_function"] or "",
-                "priority": fault["priority"] or "",
-                "sae_code": fault["sae_code"] or "",
-                "vehicle": {
-                    "make": row["make"],
-                    "model": row["model"],
-                    "engine": row["engine"] or "",
-                },
-                "matched_symptoms": [],
-                "symptom_notes": [],
-                "vehicle_notes": [],
-                "possible_causes": [],
-                "test_steps": [],
-                "top_solution": None,
-                "top_solution_with_image": None,
-            }
+    @app.route("/api/reset-password", methods=["POST"])
+    def api_reset_password():
+        data = request.get_json(silent=True) or {}
 
-            update_diagnosis_result(diagnosis_id, updated_result)
+        token = data.get("token", "").strip()
+        password = data.get("password", "")
+        password2 = data.get("password2", "")
 
-    close_diagnosis_as_admin(
-        diagnosis_id=diagnosis_id,
-        final_cause=final_cause,
-        final_fix=final_fix,
-        notes=notes,
-        resolution_image_path=resolution_image_path,
-    )
+        if not token or not password or not password2:
+            return jsonify({"success": False, "message": "Täytä kaikki kentät."}), 400
 
-    return redirect(url_for("admin.admin_unknown_tickets", success="Tiketti käsitelty"))
+        if password != password2:
+            return jsonify({"success": False, "message": "Salasanat eivät täsmää."}), 400
+
+        if len(password) < 6:
+            return jsonify({"success": False, "message": "Salasanan pitää olla vähintään 6 merkkiä."}), 400
+
+        token_row = get_valid_password_reset_token(token)
+        if not token_row:
+            return jsonify({"success": False, "message": "Linkki on vanhentunut tai virheellinen."}), 400
+
+        update_user_password(token_row["user_id"], password)
+        invalidate_user_reset_tokens(token_row["user_id"])
+        mark_password_reset_token_used(token)
+
+        return jsonify({"success": True, "message": "Salasana vaihdettu onnistuneesti."}), 200
+
+    @app.route("/api/logout", methods=["POST"])
+    def api_logout():
+        user_id = session.get("user_id")
+
+        if user_id:
+            set_user_offline(user_id)
+
+        session.clear()
+
+        return jsonify({"success": True, "message": "Uloskirjautuminen onnistui."}), 200
