@@ -137,7 +137,8 @@
             <a href="{{ url_for('order_repair_guide') }}">Korjausohje</a>
             <a href="{{ url_for('history') }}">Historia</a>
             <a href="{{ url_for('popular_repairs_page') }}">Suosituimmat</a>
-
+            <a href="{{ url_for('contact') }}">Yhteystiedot</a>
+        
             {% if current_user.is_admin == 1 %}
                 <a href="{{ url_for('admin.admin') }}">📚 DTC-kirjasto</a>
                 <a href="{{ url_for('admin.admin_users') }}">Käyttäjät</a>
