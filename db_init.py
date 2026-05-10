@@ -1,6 +1,5 @@
 import csv
 import os
-import re
 import sqlite3
 
 import psycopg2
@@ -11,7 +10,9 @@ from utils.config import Config
 
 DB_PATH = Config.DB_PATH
 DATABASE_URL = os.getenv("DATABASE_URL")
+
 print("DATABASE_URL EXISTS:", bool(DATABASE_URL))
+
 
 class PostgresCursor:
     def __init__(self, cursor, conn):
@@ -40,11 +41,9 @@ class PostgresCursor:
 
     def execute(self, sql, params=None):
         params = params or ()
-
         sql_converted = self._convert_sql(sql)
-
-        # Lisää RETURNING id yksittäisiin INSERT-lauseisiin, jotta lastrowid toimii.
         stripped = sql_converted.strip().lower()
+
         if (
             stripped.startswith("insert into")
             and "returning" not in stripped
@@ -63,7 +62,11 @@ class PostgresCursor:
             self.cursor.execute(sql_converted, params)
 
             self.lastrowid = None
-            if sql_converted.strip().lower().startswith("insert into") and "returning id" in sql_converted.lower():
+
+            if (
+                sql_converted.strip().lower().startswith("insert into")
+                and "returning id" in sql_converted.lower()
+            ):
                 row = self.cursor.fetchone()
                 if row:
                     self.lastrowid = row["id"]
@@ -97,6 +100,7 @@ class PostgresCursor:
 
         try:
             self.cursor.executemany(sql_converted, seq_of_params)
+
         except errors.DuplicateColumn:
             self.conn.rollback()
             raise sqlite3.OperationalError("duplicate column")
@@ -122,7 +126,7 @@ class PostgresConnection:
         return PostgresCursor(
             self.conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor),
             self.conn
-    )
+        )
 
     def commit(self):
         self.conn.commit()
@@ -132,6 +136,8 @@ class PostgresConnection:
 
 
 def get_connection():
+    print("GET_CONNECTION DATABASE_URL:", bool(DATABASE_URL))
+
     if DATABASE_URL:
         conn = psycopg2.connect(DATABASE_URL)
         return PostgresConnection(conn)
@@ -142,7 +148,8 @@ def get_connection():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
-    
+
+
 def seed_data():
     conn = get_connection()
     cur = conn.cursor()
@@ -560,9 +567,9 @@ def init_db():
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
     """)
-    
+
     conn.commit()
-    
+
     try:
         cur.execute("ALTER TABLE users ADD COLUMN last_active_at DATETIME")
     except sqlite3.OperationalError:
@@ -729,7 +736,7 @@ def init_db():
         """)
     except sqlite3.OperationalError:
         pass
-        
+
     conn.commit()
     conn.close()
 
