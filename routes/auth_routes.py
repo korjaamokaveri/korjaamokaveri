@@ -136,15 +136,15 @@ def register_auth_routes(app):
 
         @app.route("/forgot-password", methods=["GET", "POST"])
         def forgot_password():
-        error = None
-        success = None
-        email = ""
+            error = None
+            success = None
+            email = ""
 
-        if request.method == "POST":
-            email = request.form.get("email", "").strip().lower()
+            if request.method == "POST":
+                email = request.form.get("email", "").strip().lower()
 
-            if not email:
-                error = "Anna sähköposti."
+                if not email:
+                     error = "Anna sähköposti."
             else:
                 user = get_user_by_email(email)
 
