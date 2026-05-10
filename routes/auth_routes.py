@@ -150,10 +150,28 @@ def register_auth_routes(app):
                 user = get_user_by_email(email)
 
                 if user:
-                    token = create_password_reset_token(user["id"])
-                    reset_link = url_for("reset_password", token=token, _external=True)
+    token = create_password_reset_token(user["id"])
+    reset_link = url_for("reset_password", token=token, _external=True)
 
-                success = "Jos sähköposti löytyy järjestelmästä, salasanan vaihtolinkki on luotu."
+    send_email(
+        to_email=email,
+        subject="Korjaamo Kaveri - salasanan vaihto",
+        body=f"""Hei,
+
+Voit vaihtaa Korjaamo Kaveri -salasanasi tästä linkistä:
+
+{reset_link}
+
+Linkki on voimassa yhden tunnin.
+
+Jos et pyytänyt salasanan vaihtoa, voit jättää tämän viestin huomiotta.
+
+Terveisin,
+Korjaamo Kaveri
+"""
+    )
+
+success = "Jos sähköposti löytyy järjestelmästä, lähetimme salasanan vaihtolinkin sähköpostiin."
 
         return render_template(
             "forgot_password.html",
