@@ -210,7 +210,11 @@ def register_main_routes(app):
     @app.route("/privacy", methods=["GET"])
     def privacy():
         return render_template("privacy.html")
-
+        
+    @app.route("/contact")
+    def contact():
+        return render_template("contact.html")
+        
     @app.route("/popular-repairs", methods=["GET"])
     def popular_repairs_page():
         return render_template("popular_repairs.html", items=get_popular_repairs())
