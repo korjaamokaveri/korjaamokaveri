@@ -725,7 +725,7 @@ def init_db():
     except sqlite3.OperationalError:
         pass
         
-    seed_data()
-    
     conn.commit()
     conn.close()
+
+    seed_data()
