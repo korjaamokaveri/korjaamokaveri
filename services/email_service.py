@@ -29,14 +29,26 @@ def send_email(to_email: str, subject: str, body: str) -> bool:
     try:
         if smtp_port == 465:
             context = ssl.create_default_context()
-            with smtplib.SMTP_SSL(smtp_host, smtp_port, context=context, timeout=20) as server:
+
+            with smtplib.SMTP_SSL(
+                smtp_host,
+                smtp_port,
+                context=context,
+                timeout=20
+            ) as server:
                 server.login(smtp_user, smtp_password)
                 server.send_message(msg)
+
         else:
-            with smtplib.SMTP(smtp_host, smtp_port, timeout=20) as server:
+            with smtplib.SMTP(
+                smtp_host,
+                smtp_port,
+                timeout=20
+            ) as server:
                 server.ehlo()
                 server.starttls(context=ssl.create_default_context())
                 server.ehlo()
+
                 server.login(smtp_user, smtp_password)
                 server.send_message(msg)
 
