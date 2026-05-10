@@ -1,7 +1,7 @@
 from flask import render_template, request, redirect, url_for, session, jsonify
 from werkzeug.security import check_password_hash
-from services.email_service import send_email
 
+from services.email_service import send_email
 from services.user_service import (
     get_user_by_email,
     create_user,
@@ -128,23 +128,19 @@ def register_auth_routes(app):
 
                 return redirect(url_for("app_home"))
 
-        return render_template(
-            "login.html",
-            error=error,
-            email=email,
-        )
+        return render_template("login.html", error=error, email=email)
 
-        @app.route("/forgot-password", methods=["GET", "POST"])
-        def forgot_password():
-            error = None
-            success = None
-            email = ""
+    @app.route("/forgot-password", methods=["GET", "POST"])
+    def forgot_password():
+        error = None
+        success = None
+        email = ""
 
-            if request.method == "POST":
-                email = request.form.get("email", "").strip().lower()
+        if request.method == "POST":
+            email = request.form.get("email", "").strip().lower()
 
-                if not email:
-                     error = "Anna sähköposti."
+            if not email:
+                error = "Anna sähköposti."
             else:
                 user = get_user_by_email(email)
 
@@ -152,7 +148,7 @@ def register_auth_routes(app):
                     token = create_password_reset_token(user["id"])
                     reset_link = url_for("reset_password", token=token, _external=True)
 
-                    send_email(
+                    email_sent = send_email(
                         to_email=email,
                         subject="Korjaamo Kaveri - salasanan vaihto",
                         body=f"""Hei,
@@ -163,10 +159,16 @@ Voit vaihtaa Korjaamo Kaveri -salasanasi tästä linkistä:
 
 Linkki on voimassa yhden tunnin.
 
+Jos et pyytänyt salasanan vaihtoa, voit jättää tämän viestin huomiotta.
+
 Terveisin,
 Korjaamo Kaveri
 """
                     )
+
+                    print(f"PASSWORD RESET: email_sent={email_sent} email={email}")
+                else:
+                    print(f"PASSWORD RESET: käyttäjää ei löytynyt {email}")
 
                 success = "Jos sähköposti löytyy järjestelmästä, salasanan vaihtolinkki on lähetetty."
 
@@ -183,6 +185,7 @@ Korjaamo Kaveri
             success=success,
             email=email,
         )
+
     @app.route("/reset-password/<token>", methods=["GET", "POST"])
     def reset_password(token):
         error = None
@@ -213,12 +216,11 @@ Korjaamo Kaveri
                 update_user_password(token_row["user_id"], password)
                 invalidate_user_reset_tokens(token_row["user_id"])
                 mark_password_reset_token_used(token)
-                success = "Salasana vaihdettu onnistuneesti. Voit nyt kirjautua sisään."
 
                 return render_template(
                     "reset_password.html",
                     error=None,
-                    success=success,
+                    success="Salasana vaihdettu onnistuneesti. Voit nyt kirjautua sisään.",
                     token_valid=False,
                     token=token,
                 )
@@ -313,24 +315,15 @@ Korjaamo Kaveri
         password = data.get("password", "")
 
         if not email or not password:
-            return jsonify({
-                "success": False,
-                "message": "Sähköposti ja salasana ovat pakollisia."
-            }), 400
+            return jsonify({"success": False, "message": "Sähköposti ja salasana ovat pakollisia."}), 400
 
         user = get_user_by_email(email)
 
         if not user:
-            return jsonify({
-                "success": False,
-                "message": "Käyttäjää ei löydy tietokannasta."
-            }), 401
+            return jsonify({"success": False, "message": "Käyttäjää ei löydy tietokannasta."}), 401
 
         if not check_password_hash(user["password_hash"], password):
-            return jsonify({
-                "success": False,
-                "message": "Salasana on väärä."
-            }), 401
+            return jsonify({"success": False, "message": "Salasana on väärä."}), 401
 
         session["user_id"] = user["id"]
         set_user_online(user["id"])
@@ -341,8 +334,8 @@ Korjaamo Kaveri
             "user": {
                 "id": user["id"],
                 "email": user["email"],
-                "is_admin": user["is_admin"]
-            }
+                "is_admin": user["is_admin"],
+            },
         }), 200
 
     @app.route("/api/forgot-password", methods=["POST"])
@@ -351,13 +344,9 @@ Korjaamo Kaveri
         email = data.get("email", "").strip().lower()
 
         if not email:
-            return jsonify({
-                "success": False,
-                "message": "Anna sähköposti."
-            }), 400
+            return jsonify({"success": False, "message": "Anna sähköposti."}), 400
 
         user = get_user_by_email(email)
-        reset_link = ""
 
         if user:
             token = create_password_reset_token(user["id"])
@@ -383,8 +372,7 @@ Korjaamo Kaveri
 
         return jsonify({
             "success": True,
-            "message": "Jos sähköposti löytyy järjestelmästä, lähetimme salasanan vaihtolinkin sähköpostiin.",
-            "reset_link": reset_link
+            "message": "Jos sähköposti löytyy järjestelmästä, salasanan vaihtolinkki on lähetetty.",
         }), 200
 
     @app.route("/api/reset-password", methods=["POST"])
@@ -423,7 +411,4 @@ Korjaamo Kaveri
 
         session.clear()
 
-        return jsonify({
-            "success": True,
-            "message": "Uloskirjautuminen onnistui."
-        }), 200
+        return jsonify({"success": True, "message": "Uloskirjautuminen onnistui."}), 200
