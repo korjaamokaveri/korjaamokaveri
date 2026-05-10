@@ -139,7 +139,6 @@ def register_auth_routes(app):
         error = None
         success = None
         email = ""
-        reset_link = None
 
         if request.method == "POST":
             email = request.form.get("email", "").strip().lower()
@@ -149,14 +148,14 @@ def register_auth_routes(app):
             else:
                 user = get_user_by_email(email)
 
-            if user:
-                token = create_password_reset_token(user["id"])
-                reset_link = url_for("reset_password", token=token, _external=True)
+                if user:
+                    token = create_password_reset_token(user["id"])
+                    reset_link = url_for("reset_password", token=token, _external=True)
 
-    send_email(
-        to_email=email,
-        subject="Korjaamo Kaveri - salasanan vaihto",
-        body=f"""Hei,
+                    send_email(
+                        to_email=email,
+                        subject="Korjaamo Kaveri - salasanan vaihto",
+                        body=f"""Hei,
 
 Voit vaihtaa Korjaamo Kaveri -salasanasi tästä linkistä:
 
@@ -169,16 +168,15 @@ Jos et pyytänyt salasanan vaihtoa, voit jättää tämän viestin huomiotta.
 Terveisin,
 Korjaamo Kaveri
 """
-    )
+                    )
 
-success = "Jos sähköposti löytyy järjestelmästä, lähetimme salasanan vaihtolinkin sähköpostiin."
+                success = "Jos sähköposti löytyy järjestelmästä, lähetimme salasanan vaihtolinkin sähköpostiin."
 
         return render_template(
             "forgot_password.html",
             error=error,
             success=success,
             email=email,
-            reset_link=reset_link,
         )
 
     @app.route("/reset-password/<token>", methods=["GET", "POST"])
@@ -355,16 +353,34 @@ success = "Jos sähköposti löytyy järjestelmästä, lähetimme salasanan vaih
             }), 400
 
         user = get_user_by_email(email)
-        reset_link = None
+        reset_link = ""
 
         if user:
             token = create_password_reset_token(user["id"])
             reset_link = url_for("reset_password", token=token, _external=True)
 
+            send_email(
+                to_email=email,
+                subject="Korjaamo Kaveri - salasanan vaihto",
+                body=f"""Hei,
+
+Voit vaihtaa Korjaamo Kaveri -salasanasi tästä linkistä:
+
+{reset_link}
+
+Linkki on voimassa yhden tunnin.
+
+Jos et pyytänyt salasanan vaihtoa, voit jättää tämän viestin huomiotta.
+
+Terveisin,
+Korjaamo Kaveri
+"""
+            )
+
         return jsonify({
             "success": True,
-            "message": "Jos sähköposti löytyy järjestelmästä, salasanan vaihtolinkki on luotu.",
-            "reset_link": reset_link or ""
+            "message": "Jos sähköposti löytyy järjestelmästä, lähetimme salasanan vaihtolinkin sähköpostiin.",
+            "reset_link": reset_link
         }), 200
 
     @app.route("/api/reset-password", methods=["POST"])
