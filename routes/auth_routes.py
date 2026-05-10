@@ -1,5 +1,6 @@
 from flask import render_template, request, redirect, url_for, session, jsonify
 from werkzeug.security import check_password_hash
+from services.email_service import send_email
 
 from services.user_service import (
     get_user_by_email,
