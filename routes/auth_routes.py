@@ -33,11 +33,11 @@ def register_auth_routes(app):
             "accept_privacy": False,
         }
 
-        @app.route("/register", methods=["GET", "POST"])
-        def register():
-            error = None
-            success = None
-            form_data = empty_form_data()
+    @app.route("/register", methods=["GET", "POST"])
+    def register():
+        error = None
+        success = None
+        form_data = empty_form_data()
 
         if request.method == "POST":
             form_data["email"] = request.form.get("email", "").strip().lower()
@@ -154,7 +154,7 @@ def register_auth_routes(app):
             error=error,
             email=email,
         )
-        
+
     @app.route("/forgot-password", methods=["GET", "POST"])
     def forgot_password():
         error = None
@@ -350,7 +350,10 @@ Korjaamo Kaveri
         if not check_password_hash(user["password_hash"], password):
             return jsonify({"success": False, "message": "Salasana on väärä."}), 401
 
+        session.clear()
         session["user_id"] = user["id"]
+        session.permanent = True
+
         set_user_online(user["id"])
 
         return jsonify({
