@@ -33,7 +33,7 @@ def register_auth_routes(app):
             "accept_privacy": False,
         }
 
-    @app.route("/register", methods=["GET", "POST"])
+        @app.route("/register", methods=["GET", "POST"])
     def register():
         error = None
         success = None
@@ -58,6 +58,11 @@ def register_auth_routes(app):
             if form_data["customer_type"] not in {"private", "company"}:
                 form_data["customer_type"] = "private"
 
+            existing_user = get_user_by_email(form_data["email"])
+
+            print(f"REGISTER DEBUG: email={form_data['email']}")
+            print(f"REGISTER DEBUG: existing_user={bool(existing_user)}")
+
             if (
                 not form_data["email"]
                 or not form_data["full_name"]
@@ -78,7 +83,7 @@ def register_auth_routes(app):
                 error = "Hyväksy tietosuojaseloste."
             elif form_data["customer_type"] == "company" and not form_data["company_name"]:
                 error = "Yritysasiakkaalle yrityksen nimi on pakollinen."
-            elif get_user_by_email(form_data["email"]):
+            elif existing_user:
                 error = "Tällä sähköpostilla on jo tili."
             else:
                 create_user(
