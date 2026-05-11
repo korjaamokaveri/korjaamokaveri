@@ -61,6 +61,7 @@ def create_user(
     company_name: str = "",
     vat_number: str = "",
 ):
+    ensure_user_profile_columns()
     conn = get_connection()
     cur = conn.cursor()
 
