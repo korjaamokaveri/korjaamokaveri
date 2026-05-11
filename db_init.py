@@ -749,16 +749,7 @@ def init_db():
         "last_active_at TIMESTAMP",
         "is_online INTEGER DEFAULT 0",
     ]
-
-    for column in required_user_columns:
-        try:
-            cur.execute(f"ALTER TABLE users ADD COLUMN {column}")
-            conn.commit()
-            print(f"ADDED users.{column}")
-        except Exception as e:
-            conn.commit()
-            print(f"SKIPPED users.{column}: {type(e).__name__}")
-            
+       
     conn.commit()
     conn.close()
 
