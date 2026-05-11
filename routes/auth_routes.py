@@ -34,10 +34,10 @@ def register_auth_routes(app):
         }
 
         @app.route("/register", methods=["GET", "POST"])
-    def register():
-        error = None
-        success = None
-        form_data = empty_form_data()
+        def register():
+            error = None
+            success = None
+            form_data = empty_form_data()
 
         if request.method == "POST":
             form_data["email"] = request.form.get("email", "").strip().lower()
