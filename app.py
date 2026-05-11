@@ -68,7 +68,18 @@ def create_app():
     @app.route("/health")
     def health():
         return "OK", 200
+    
+    @app.route("/fix-admin-temp")
+    def fix_admin_temp():
+        email = "ville_salovaara@hotmail.com"
+        user = get_user_by_email(email)
 
+        if not user:
+            return "Admin-käyttäjää ei löydy"
+
+        make_user_admin(email)
+
+        return "Admin korjattu"
     return app
 
 
