@@ -71,15 +71,23 @@ def create_app():
     
     @app.route("/fix-admin-temp")
     def fix_admin_temp():
+        from services.user_service import (
+            get_user_by_email,
+            update_user_password,
+            make_user_admin,
+        )
+
         email = "ville_salovaara@hotmail.com"
         user = get_user_by_email(email)
 
         if not user:
-            return "Admin-käyttäjää ei löydy"
+            return "Käyttäjää ei löytynyt"
 
+        update_user_password(user["id"], "Testi12345")
         make_user_admin(email)
 
         return "Admin korjattu"
+        
     return app
 
 
