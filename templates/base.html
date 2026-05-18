@@ -109,43 +109,32 @@
             background: #1d4ed8;
         }
 
-        @media (max-width: 760px) {
-            
-            .nav {
-                padding: 14px 16px;
-            }
-
-            .brand {
-                font-size: 20px;
-            }
-
-            .content {
-                padding: 18px;
-            }
-        }
         @media (max-width: 700px) {
 
             .nav {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 12px;
+                padding: 14px 16px !important;
             }
 
-            .nav-left,
+            .nav-left {
+                width: 100%;
+            }
+
             .nav-right {
-                width: 100%;
-                flex-direction: column;
-                align-items: flex-start;
+                display: none !important;
             }
 
-            .nav a {
-                width: 100%;
+            .nav-left a:not(.brand) {
+                display: none !important;
             }
 
-            .badge {
-            margin-top: 6px;
+            .brand {
+                font-size: 20px !important;
             }
-    }
+
+            .content {
+                padding: 14px !important;
+            }
+        }
     </style>
 
     {% block extra_css %}{% endblock %}
@@ -153,6 +142,7 @@
 <body>
 
 <div class="nav">
+
     <div class="nav-left">
         <a href="/" class="brand">Korjaamo Kaveri</a>
 
@@ -162,7 +152,7 @@
             <a href="{{ url_for('history') }}">Historia</a>
             <a href="{{ url_for('popular_repairs_page') }}">Suosituimmat</a>
             <a href="{{ url_for('contact') }}">Yhteystiedot</a>
-        
+
             {% if current_user.is_admin == 1 %}
                 <a href="{{ url_for('admin.admin') }}">📚 DTC-kirjasto</a>
                 <a href="{{ url_for('admin.admin_users') }}">Käyttäjät</a>
@@ -175,6 +165,7 @@
 
     <div class="nav-right">
         {% if current_user %}
+
             <span class="badge
                 {% if current_user.is_admin == 1 %}
                     badge-admin
@@ -198,11 +189,15 @@
             </span>
 
             <a href="{{ url_for('logout') }}">Ulos</a>
+
         {% else %}
+
             <a href="{{ url_for('login') }}">Kirjaudu</a>
             <a href="{{ url_for('register') }}">Rekisteröidy</a>
+
         {% endif %}
     </div>
+
 </div>
 
 <div class="content">
@@ -211,4 +206,3 @@
 
 </body>
 </html>
-```
