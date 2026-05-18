@@ -1,1 +1,131 @@
+{% extends "base.html" %}
 
+{% block title %}Oma tili{% endblock %}
+
+{% block content %}
+
+<div class="card" style="max-width:800px; margin:40px auto;">
+
+    <h1>Oma tili</h1>
+
+    {% if success %}
+        <div style="
+            background:#16a34a;
+            color:white;
+            padding:14px;
+            border-radius:12px;
+            margin-bottom:20px;
+        ">
+            {{ success }}
+        </div>
+    {% endif %}
+
+    {% if error %}
+        <div style="
+            background:#dc2626;
+            color:white;
+            padding:14px;
+            border-radius:12px;
+            margin-bottom:20px;
+        ">
+            {{ error }}
+        </div>
+    {% endif %}
+
+    <form method="POST">
+
+        <div style="display:grid; gap:16px;">
+
+            <input
+                type="text"
+                name="full_name"
+                placeholder="Nimi"
+                value="{{ current_user.full_name or '' }}"
+                class="form-input"
+            >
+
+            <input
+                type="text"
+                name="phone"
+                placeholder="Puhelin"
+                value="{{ current_user.phone or '' }}"
+                class="form-input"
+            >
+
+            <input
+                type="text"
+                name="address_line1"
+                placeholder="Osoite"
+                value="{{ current_user.address_line1 or '' }}"
+                class="form-input"
+            >
+
+            <input
+                type="text"
+                name="postal_code"
+                placeholder="Postinumero"
+                value="{{ current_user.postal_code or '' }}"
+                class="form-input"
+            >
+
+            <input
+                type="text"
+                name="city"
+                placeholder="Kaupunki"
+                value="{{ current_user.city or '' }}"
+                class="form-input"
+            >
+
+            <input
+                type="text"
+                name="country"
+                placeholder="Maa"
+                value="{{ current_user.country or '' }}"
+                class="form-input"
+            >
+
+            <select name="customer_type" class="form-input">
+
+                <option
+                    value="private"
+                    {% if current_user.customer_type == "private" %}selected{% endif %}
+                >
+                    Yksityisasiakas
+                </option>
+
+                <option
+                    value="company"
+                    {% if current_user.customer_type == "company" %}selected{% endif %}
+                >
+                    Yritys
+                </option>
+
+            </select>
+
+            <input
+                type="text"
+                name="company_name"
+                placeholder="Yrityksen nimi"
+                value="{{ current_user.company_name or '' }}"
+                class="form-input"
+            >
+
+            <input
+                type="text"
+                name="vat_number"
+                placeholder="Y-tunnus / VAT"
+                value="{{ current_user.vat_number or '' }}"
+                class="form-input"
+            >
+
+            <button class="btn" type="submit">
+                Tallenna tiedot
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}
