@@ -2,129 +2,297 @@
 
 {% block title %}Oma tili{% endblock %}
 
+{% block extra_css %}
+<style>
+
+.account-wrap {
+    max-width: 900px;
+    margin: 40px auto;
+}
+
+.account-header {
+    margin-bottom: 28px;
+}
+
+.account-header h1 {
+    font-size: 42px;
+    margin-bottom: 10px;
+    font-weight: 900;
+}
+
+.account-header p {
+    color: rgba(255,255,255,0.72);
+    font-size: 18px;
+}
+
+.account-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 28px;
+    padding: 32px;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group.full {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.88);
+}
+
+.form-input {
+    width: 100%;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.08);
+    color: white;
+    border-radius: 16px;
+    padding: 15px 16px;
+    font-size: 16px;
+    outline: none;
+    transition: 0.2s ease;
+}
+
+.form-input:focus {
+    border-color: #3b82f6;
+    background: rgba(255,255,255,0.12);
+    box-shadow: 0 0 0 4px rgba(59,130,246,0.18);
+}
+
+.form-input::placeholder {
+    color: rgba(255,255,255,0.4);
+}
+
+.save-btn {
+    margin-top: 30px;
+    width: 100%;
+    border: none;
+    border-radius: 18px;
+    padding: 18px;
+    font-size: 17px;
+    font-weight: 800;
+    background: linear-gradient(
+        135deg,
+        #2563eb,
+        #1d4ed8
+    );
+    color: white;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.save-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 30px rgba(37,99,235,0.35);
+}
+
+.success-box {
+    margin-bottom: 22px;
+    padding: 16px;
+    border-radius: 16px;
+    background: rgba(22,163,74,0.18);
+    border: 1px solid rgba(22,163,74,0.35);
+    color: #86efac;
+    font-weight: 700;
+}
+
+.error-box {
+    margin-bottom: 22px;
+    padding: 16px;
+    border-radius: 16px;
+    background: rgba(220,38,38,0.18);
+    border: 1px solid rgba(220,38,38,0.35);
+    color: #fca5a5;
+    font-weight: 700;
+}
+
+@media (max-width: 760px) {
+
+    .account-wrap {
+        margin: 20px auto;
+    }
+
+    .account-card {
+        padding: 22px;
+        border-radius: 22px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+
+    .account-header h1 {
+        font-size: 34px;
+    }
+
+    .account-header p {
+        font-size: 16px;
+    }
+}
+
+</style>
+{% endblock %}
+
 {% block content %}
 
-<div class="card" style="max-width:800px; margin:40px auto;">
+<div class="account-wrap">
 
-    <h1>Oma tili</h1>
+    <div class="account-header">
+        <h1>Oma tili</h1>
+        <p>
+            Hallitse omia asiakas- ja laskutustietojasi yhdessä paikassa.
+        </p>
+    </div>
 
-    {% if success %}
-        <div style="
-            background:#16a34a;
-            color:white;
-            padding:14px;
-            border-radius:12px;
-            margin-bottom:20px;
-        ">
-            {{ success }}
-        </div>
-    {% endif %}
+    <div class="account-card">
 
-    {% if error %}
-        <div style="
-            background:#dc2626;
-            color:white;
-            padding:14px;
-            border-radius:12px;
-            margin-bottom:20px;
-        ">
-            {{ error }}
-        </div>
-    {% endif %}
+        {% if success %}
+            <div class="success-box">
+                {{ success }}
+            </div>
+        {% endif %}
 
-    <form method="POST">
+        {% if error %}
+            <div class="error-box">
+                {{ error }}
+            </div>
+        {% endif %}
 
-        <div style="display:grid; gap:16px;">
+        <form method="POST">
 
-            <input
-                type="text"
-                name="full_name"
-                placeholder="Nimi"
-                value="{{ current_user.full_name or '' }}"
-                class="form-input"
-            >
+            <div class="form-grid">
 
-            <input
-                type="text"
-                name="phone"
-                placeholder="Puhelin"
-                value="{{ current_user.phone or '' }}"
-                class="form-input"
-            >
+                <div class="form-group">
+                    <label>Nimi</label>
+                    <input
+                        type="text"
+                        name="full_name"
+                        value="{{ current_user.full_name or '' }}"
+                        class="form-input"
+                    >
+                </div>
 
-            <input
-                type="text"
-                name="address_line1"
-                placeholder="Osoite"
-                value="{{ current_user.address_line1 or '' }}"
-                class="form-input"
-            >
+                <div class="form-group">
+                    <label>Puhelin</label>
+                    <input
+                        type="text"
+                        name="phone"
+                        value="{{ current_user.phone or '' }}"
+                        class="form-input"
+                    >
+                </div>
 
-            <input
-                type="text"
-                name="postal_code"
-                placeholder="Postinumero"
-                value="{{ current_user.postal_code or '' }}"
-                class="form-input"
-            >
+                <div class="form-group full">
+                    <label>Osoite</label>
+                    <input
+                        type="text"
+                        name="address_line1"
+                        value="{{ current_user.address_line1 or '' }}"
+                        class="form-input"
+                    >
+                </div>
 
-            <input
-                type="text"
-                name="city"
-                placeholder="Kaupunki"
-                value="{{ current_user.city or '' }}"
-                class="form-input"
-            >
+                <div class="form-group">
+                    <label>Postinumero</label>
+                    <input
+                        type="text"
+                        name="postal_code"
+                        value="{{ current_user.postal_code or '' }}"
+                        class="form-input"
+                    >
+                </div>
 
-            <input
-                type="text"
-                name="country"
-                placeholder="Maa"
-                value="{{ current_user.country or '' }}"
-                class="form-input"
-            >
+                <div class="form-group">
+                    <label>Kaupunki</label>
+                    <input
+                        type="text"
+                        name="city"
+                        value="{{ current_user.city or '' }}"
+                        class="form-input"
+                    >
+                </div>
 
-            <select name="customer_type" class="form-input">
+                <div class="form-group">
+                    <label>Maa</label>
+                    <input
+                        type="text"
+                        name="country"
+                        value="{{ current_user.country or '' }}"
+                        class="form-input"
+                    >
+                </div>
 
-                <option
-                    value="private"
-                    {% if current_user.customer_type == "private" %}selected{% endif %}
-                >
-                    Yksityisasiakas
-                </option>
+                <div class="form-group">
+                    <label>Asiakastyyppi</label>
 
-                <option
-                    value="company"
-                    {% if current_user.customer_type == "company" %}selected{% endif %}
-                >
-                    Yritys
-                </option>
+                    <select name="customer_type" class="form-input">
 
-            </select>
+                        <option
+                            value="private"
+                            {% if current_user.customer_type == "private" %}
+                                selected
+                            {% endif %}
+                        >
+                            Yksityisasiakas
+                        </option>
 
-            <input
-                type="text"
-                name="company_name"
-                placeholder="Yrityksen nimi"
-                value="{{ current_user.company_name or '' }}"
-                class="form-input"
-            >
+                        <option
+                            value="company"
+                            {% if current_user.customer_type == "company" %}
+                                selected
+                            {% endif %}
+                        >
+                            Yritys
+                        </option>
 
-            <input
-                type="text"
-                name="vat_number"
-                placeholder="Y-tunnus / VAT"
-                value="{{ current_user.vat_number or '' }}"
-                class="form-input"
-            >
+                    </select>
+                </div>
 
-            <button class="btn" type="submit">
+                <div class="form-group">
+                    <label>Yrityksen nimi</label>
+                    <input
+                        type="text"
+                        name="company_name"
+                        value="{{ current_user.company_name or '' }}"
+                        class="form-input"
+                    >
+                </div>
+
+                <div class="form-group full">
+                    <label>Y-tunnus / VAT</label>
+                    <input
+                        type="text"
+                        name="vat_number"
+                        value="{{ current_user.vat_number or '' }}"
+                        class="form-input"
+                    >
+                </div>
+
+            </div>
+
+            <button class="save-btn" type="submit">
                 Tallenna tiedot
             </button>
 
-        </div>
+        </form>
 
-    </form>
+    </div>
 
 </div>
 
