@@ -99,8 +99,7 @@ def register_auth_routes(app):
                     company_name=form_data["company_name"],
                     vat_number=form_data["vat_number"],
                 )
-                success = "Rekisteröinti onnistui. Voit nyt kirjautua sisään."
-                form_data = empty_form_data()
+                return redirect(url_for("login", registered="1"))
 
         return render_template(
             "register.html",
