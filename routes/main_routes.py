@@ -8,7 +8,11 @@ from werkzeug.utils import secure_filename
 from utils.config import Config
 from utils.auth import get_current_user
 from decorators import base_system_required
-from services.user_service import can_user_view_repair_guides
+from services.user_service import (
+    can_user_view_repair_guides,
+    update_user_profile,
+    get_user_by_id,
+)
 from services.diagnostics_service import diagnose
 from services.vin_service import detect_vehicle_identifier
 from services.ticket_service import (
