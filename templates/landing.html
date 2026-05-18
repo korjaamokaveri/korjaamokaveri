@@ -2,14 +2,169 @@
 
 {% block title %}Korjaamo Kaveri{% endblock %}
 
-{% block content %}
-<div class="card" style="max-width:900px; margin:40px auto;">
-    <h1>Korjaamo Kaveri</h1>
-    <p>Älykäs vikakoodien tulkinta, tiketinhallinta ja myöhemmin maksulliset lisäohjeet.</p>
+{% block extra_css %}
+<style>
+    .hero {
+        max-width: 1200px;
+        margin: 60px auto;
+        padding: 0 20px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 50px;
+        align-items: center;
+    }
 
-    <div style="margin-top:20px; display:flex; gap:12px; flex-wrap:wrap;">
-        <a class="btn" href="{{ url_for('login') }}">Kirjaudu</a>
-        <a class="btn" href="{{ url_for('register') }}">Rekisteröidy</a>
+    .hero-text h1 {
+        font-size: 58px;
+        line-height: 1.05;
+        margin-bottom: 24px;
+        color: white;
+        font-weight: 900;
+    }
+
+    .hero-text p {
+        font-size: 20px;
+        line-height: 1.7;
+        color: rgba(255,255,255,0.85);
+        margin-bottom: 32px;
+        max-width: 620px;
+    }
+
+    .hero-buttons {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+    }
+
+    .hero-buttons .btn {
+        padding: 16px 26px;
+        border-radius: 16px;
+        font-size: 16px;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .btn-secondary {
+        background: rgba(255,255,255,0.12);
+        color: white;
+        border: 1px solid rgba(255,255,255,0.18);
+    }
+
+    .hero-card {
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.12);
+        backdrop-filter: blur(12px);
+        border-radius: 28px;
+        padding: 32px;
+        color: white;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    }
+
+    .hero-card h2 {
+        margin-top: 0;
+        margin-bottom: 20px;
+        font-size: 28px;
+    }
+
+    .feature-list {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .feature-item {
+        background: rgba(255,255,255,0.06);
+        border-radius: 18px;
+        padding: 18px;
+    }
+
+    .feature-item strong {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 17px;
+    }
+
+    .feature-item span {
+        color: rgba(255,255,255,0.8);
+        font-size: 15px;
+        line-height: 1.5;
+    }
+
+    @media (max-width: 900px) {
+        .hero {
+            grid-template-columns: 1fr;
+            margin-top: 30px;
+        }
+
+        .hero-text h1 {
+            font-size: 42px;
+        }
+
+        .hero-text p {
+            font-size: 18px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="hero">
+
+    <div class="hero-text">
+        <h1>Korjaamo Kaveri</h1>
+
+        <p>
+            Älykäs vikadiagnostiikka autoille. Tunnista vikakoodit,
+            seuraa korjaustilanteita, hallitse tikettejä ja löydä
+            mahdolliset syyt nopeasti.
+        </p>
+
+        <div class="hero-buttons">
+            <a class="btn" href="{{ url_for('login') }}">
+                Kirjaudu sisään
+            </a>
+
+            <a class="btn btn-secondary" href="{{ url_for('register') }}">
+                Luo käyttäjätili
+            </a>
+        </div>
     </div>
-</div>
+
+    <div class="hero-card">
+        <h2>Mitä palvelu tekee?</h2>
+
+        <div class="feature-list">
+
+            <div class="feature-item">
+                <strong>Vikakoodien tulkinta</strong>
+                <span>
+                    Saat nopeasti mahdolliset vikasyyt ja testausvaiheet.
+                </span>
+            </div>
+
+            <div class="feature-item">
+                <strong>Tiketinhallinta</strong>
+                <span>
+                    Seuraa korjauksia ja tallenna diagnoosit myöhempää käyttöä varten.
+                </span>
+            </div>
+
+            <div class="feature-item">
+                <strong>Korjausohjeet</strong>
+                <span>
+                    Maksulliset lisäohjeet ja korjausoppaat tulevat myöhemmin käyttöön.
+                </span>
+            </div>
+
+            <div class="feature-item">
+                <strong>Rakennettu oikeaan käyttöön</strong>
+                <span>
+                    Suunniteltu harrastajille, korjaamoille ja autojen omistajille.
+                </span>
+            </div>
+
+        </div>
+    </div>
+
+</section>
 {% endblock %}
