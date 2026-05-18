@@ -110,6 +110,7 @@
         }
 
         @media (max-width: 760px) {
+            
             .nav {
                 padding: 14px 16px;
             }
@@ -122,6 +123,29 @@
                 padding: 18px;
             }
         }
+        @media (max-width: 700px) {
+
+            .nav {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .nav-left,
+            .nav-right {
+                width: 100%;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .nav a {
+                width: 100%;
+            }
+
+            .badge {
+            margin-top: 6px;
+            }
+    }
     </style>
 
     {% block extra_css %}{% endblock %}
