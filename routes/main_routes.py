@@ -174,7 +174,8 @@ def register_main_routes(app):
             success = "Tiedot päivitetty onnistuneesti."
 
             current_user = get_user_by_id(current_user["id"])
-
+            print(current_user)
+            
         return render_template(
             "account.html",
             current_user=current_user,
