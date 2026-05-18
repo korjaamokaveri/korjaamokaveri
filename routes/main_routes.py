@@ -144,6 +144,8 @@ def register_main_routes(app):
     @app.route("/account", methods=["GET", "POST"])
     def account():
 
+        current_user = get_current_user()
+
         if not current_user:
             return redirect(url_for("login"))
 
@@ -167,21 +169,15 @@ def register_main_routes(app):
 
             success = "Tiedot päivitetty onnistuneesti."
 
-            current_user_updated = get_user_by_id(current_user["id"])
+            current_user = get_user_by_id(current_user["id"])
 
         return render_template(
             "account.html",
-            current_user=current_user_updated,
+            current_user=current_user,
             success=success,
             error=error,
         )
-
-    return render_template(
-        "account.html",
-        current_user=current_user,
-        success=success,
-        error=error,
-    )
+        
     @app.route("/payment-coming-soon", methods=["POST"])
     def payment_coming_soon():
         return redirect(url_for("create_checkout_session"), code=307)
