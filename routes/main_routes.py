@@ -61,7 +61,6 @@ def parse_vehicle_identifier(raw_value: str, make: str):
 
     return vehicle_identifier, make, vehicle_id_info
 
-
 def register_main_routes(app):
     @app.route("/", methods=["GET"])
     def landing():
@@ -101,7 +100,7 @@ def register_main_routes(app):
             current_user=current_user,
             success=request.args.get("success"),
         )
-
+   
     @app.route("/create-checkout-session", methods=["POST"])
     def create_checkout_session():
         current_user = get_current_user()
@@ -141,7 +140,48 @@ def register_main_routes(app):
         )
 
         return redirect(checkout_session.url, code=303)
+        
+    @app.route("/account", methods=["GET", "POST"])
+    def account():
 
+        if not current_user:
+            return redirect(url_for("login"))
+
+        error = None
+        success = None
+
+        if request.method == "POST":
+
+            update_user_profile(
+                user_id=current_user["id"],
+                full_name=request.form.get("full_name", ""),
+                phone=request.form.get("phone", ""),
+                address_line1=request.form.get("address_line1", ""),
+                postal_code=request.form.get("postal_code", ""),
+                city=request.form.get("city", ""),
+                country=request.form.get("country", ""),
+                customer_type=request.form.get("customer_type", "private"),
+                company_name=request.form.get("company_name", ""),
+                vat_number=request.form.get("vat_number", ""),
+            )
+
+            success = "Tiedot päivitetty onnistuneesti."
+
+            current_user_updated = get_user_by_id(current_user["id"])
+
+        return render_template(
+            "account.html",
+            current_user=current_user_updated,
+            success=success,
+            error=error,
+        )
+
+    return render_template(
+        "account.html",
+        current_user=current_user,
+        success=success,
+        error=error,
+    )
     @app.route("/payment-coming-soon", methods=["POST"])
     def payment_coming_soon():
         return redirect(url_for("create_checkout_session"), code=307)
