@@ -19,6 +19,53 @@ def get_user_by_id(user_id: int):
     conn.close()
     return user
     
+def update_user_profile(
+    user_id: int,
+    full_name: str,
+    phone: str,
+    address_line1: str,
+    postal_code: str,
+    city: str,
+    country: str,
+    customer_type: str,
+    company_name: str,
+    vat_number: str,
+):
+    normalized_customer_type = (customer_type or "private").strip().lower()
+    if normalized_customer_type not in {"private", "company"}:
+        normalized_customer_type = "private"
+
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        UPDATE users
+        SET full_name = ?,
+            phone = ?,
+            address_line1 = ?,
+            postal_code = ?,
+            city = ?,
+            country = ?,
+            customer_type = ?,
+            company_name = ?,
+            vat_number = ?
+        WHERE id = ?
+    """, (
+        (full_name or "").strip(),
+        (phone or "").strip(),
+        (address_line1 or "").strip(),
+        (postal_code or "").strip(),
+        (city or "").strip(),
+        (country or "").strip(),
+        normalized_customer_type,
+        (company_name or "").strip(),
+        (vat_number or "").strip(),
+        user_id,
+    ))
+
+    conn.commit()
+    conn.close()
+    
 def ensure_user_profile_columns():
     conn = get_connection()
     cur = conn.cursor()
