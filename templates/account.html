@@ -5,33 +5,86 @@
 {% block extra_css %}
 <style>
 
-.account-wrap {
-    max-width: 900px;
+.account-page {
+    max-width: 1100px;
     margin: 40px auto;
 }
 
-.account-header {
-    margin-bottom: 28px;
+.account-top {
+    margin-bottom: 30px;
 }
 
-.account-header h1 {
-    font-size: 42px;
-    margin-bottom: 10px;
+.account-top h1 {
+    font-size: 44px;
+    margin: 0 0 10px;
     font-weight: 900;
 }
 
-.account-header p {
+.account-top p {
     color: rgba(255,255,255,0.72);
     font-size: 18px;
+    line-height: 1.6;
+}
+
+.account-grid {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 26px;
 }
 
 .account-card {
     background: rgba(255,255,255,0.06);
     border: 1px solid rgba(255,255,255,0.08);
     border-radius: 28px;
-    padding: 32px;
+    padding: 28px;
     backdrop-filter: blur(16px);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.30);
+}
+
+.profile-name {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.profile-email {
+    color: rgba(255,255,255,0.68);
+    margin-bottom: 26px;
+    word-break: break-word;
+}
+
+.profile-section {
+    margin-bottom: 24px;
+}
+
+.profile-label {
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 8px;
+}
+
+.profile-value {
+    font-size: 16px;
+    color: white;
+    line-height: 1.5;
+}
+
+.account-badge {
+    display: inline-block;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: #2563eb;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.form-title {
+    font-size: 28px;
+    margin-bottom: 24px;
+    font-weight: 800;
 }
 
 .form-grid {
@@ -58,7 +111,7 @@
 
 .form-input {
     width: 100%;
-    border: 1px solid rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.10);
     background: rgba(255,255,255,0.08);
     color: white;
     border-radius: 16px;
@@ -79,7 +132,7 @@
 }
 
 .save-btn {
-    margin-top: 30px;
+    margin-top: 28px;
     width: 100%;
     border: none;
     border-radius: 18px;
@@ -102,7 +155,7 @@
 }
 
 .success-box {
-    margin-bottom: 22px;
+    margin-bottom: 20px;
     padding: 16px;
     border-radius: 16px;
     background: rgba(22,163,74,0.18);
@@ -112,7 +165,7 @@
 }
 
 .error-box {
-    margin-bottom: 22px;
+    margin-bottom: 20px;
     padding: 16px;
     border-radius: 16px;
     background: rgba(220,38,38,0.18);
@@ -121,10 +174,21 @@
     font-weight: 700;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 920px) {
 
-    .account-wrap {
-        margin: 20px auto;
+    .account-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 700px) {
+
+    .account-page {
+        margin: 18px auto;
     }
 
     .account-card {
@@ -132,16 +196,11 @@
         border-radius: 22px;
     }
 
-    .form-grid {
-        grid-template-columns: 1fr;
-        gap: 18px;
-    }
-
-    .account-header h1 {
+    .account-top h1 {
         font-size: 34px;
     }
 
-    .account-header p {
+    .account-top p {
         font-size: 16px;
     }
 }
@@ -151,146 +210,244 @@
 
 {% block content %}
 
-<div class="account-wrap">
+<div class="account-page">
 
-    <div class="account-header">
+    <div class="account-top">
         <h1>Oma tili</h1>
+
         <p>
-            Hallitse omia asiakas- ja laskutustietojasi yhdessä paikassa.
+            Hallitse asiakastietoja, yhteystietoja ja yritystietoja yhdestä paikasta.
         </p>
     </div>
 
-    <div class="account-card">
+    <div class="account-grid">
 
-        {% if success %}
-            <div class="success-box">
-                {{ success }}
+        <div class="account-card">
+
+            <div class="profile-name">
+                {{ current_user.full_name or "Käyttäjä" }}
             </div>
-        {% endif %}
 
-        {% if error %}
-            <div class="error-box">
-                {{ error }}
+            <div class="profile-email">
+                {{ current_user.email }}
             </div>
-        {% endif %}
 
-        <form method="POST">
+            <div class="profile-section">
+                <div class="profile-label">Tilin tyyppi</div>
 
-            <div class="form-grid">
+                <div class="profile-value">
+                    <span class="account-badge">
 
-                <div class="form-group">
-                    <label>Nimi</label>
-                    <input
-                        type="text"
-                        name="full_name"
-                        value="{{ current_user.full_name or '' }}"
-                        class="form-input"
-                    >
+                        {% if current_user.is_admin == 1 %}
+                            ADMIN
+                        {% elif current_user.account_type == "test" %}
+                            TEST
+                        {% else %}
+                            BASIC
+                        {% endif %}
+
+                    </span>
+                </div>
+            </div>
+
+            <div class="profile-section">
+                <div class="profile-label">Puhelin</div>
+                <div class="profile-value">
+                    {{ current_user.phone or "-" }}
+                </div>
+            </div>
+
+            <div class="profile-section">
+                <div class="profile-label">Osoite</div>
+
+                <div class="profile-value">
+                    {{ current_user.address_line1 or "-" }}<br>
+
+                    {% if current_user.postal_code or current_user.city %}
+                        {{ current_user.postal_code or "" }}
+                        {{ current_user.city or "" }}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="profile-section">
+                <div class="profile-label">Maa</div>
+
+                <div class="profile-value">
+                    {{ current_user.country or "-" }}
+                </div>
+            </div>
+
+            {% if current_user.customer_type == "company" %}
+
+                <div class="profile-section">
+                    <div class="profile-label">Yritys</div>
+
+                    <div class="profile-value">
+                        {{ current_user.company_name or "-" }}
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label>Puhelin</label>
-                    <input
-                        type="text"
-                        name="phone"
-                        value="{{ current_user.phone or '' }}"
-                        class="form-input"
-                    >
+                <div class="profile-section">
+                    <div class="profile-label">Y-tunnus / VAT</div>
+
+                    <div class="profile-value">
+                        {{ current_user.vat_number or "-" }}
+                    </div>
                 </div>
 
-                <div class="form-group full">
-                    <label>Osoite</label>
-                    <input
-                        type="text"
-                        name="address_line1"
-                        value="{{ current_user.address_line1 or '' }}"
-                        class="form-input"
-                    >
+            {% endif %}
+
+        </div>
+
+        <div class="account-card">
+
+            <div class="form-title">
+                Muokkaa tietoja
+            </div>
+
+            {% if success %}
+                <div class="success-box">
+                    {{ success }}
                 </div>
+            {% endif %}
 
-                <div class="form-group">
-                    <label>Postinumero</label>
-                    <input
-                        type="text"
-                        name="postal_code"
-                        value="{{ current_user.postal_code or '' }}"
-                        class="form-input"
-                    >
+            {% if error %}
+                <div class="error-box">
+                    {{ error }}
                 </div>
+            {% endif %}
 
-                <div class="form-group">
-                    <label>Kaupunki</label>
-                    <input
-                        type="text"
-                        name="city"
-                        value="{{ current_user.city or '' }}"
-                        class="form-input"
-                    >
-                </div>
+            <form method="POST">
 
-                <div class="form-group">
-                    <label>Maa</label>
-                    <input
-                        type="text"
-                        name="country"
-                        value="{{ current_user.country or '' }}"
-                        class="form-input"
-                    >
-                </div>
+                <div class="form-grid">
 
-                <div class="form-group">
-                    <label>Asiakastyyppi</label>
+                    <div class="form-group">
+                        <label>Nimi</label>
 
-                    <select name="customer_type" class="form-input">
-
-                        <option
-                            value="private"
-                            {% if current_user.customer_type == "private" %}
-                                selected
-                            {% endif %}
+                        <input
+                            type="text"
+                            name="full_name"
+                            value="{{ current_user.full_name or '' }}"
+                            class="form-input"
                         >
-                            Yksityisasiakas
-                        </option>
+                    </div>
 
-                        <option
-                            value="company"
-                            {% if current_user.customer_type == "company" %}
-                                selected
-                            {% endif %}
+                    <div class="form-group">
+                        <label>Puhelin</label>
+
+                        <input
+                            type="text"
+                            name="phone"
+                            value="{{ current_user.phone or '' }}"
+                            class="form-input"
                         >
-                            Yritys
-                        </option>
+                    </div>
 
-                    </select>
+                    <div class="form-group full">
+                        <label>Osoite</label>
+
+                        <input
+                            type="text"
+                            name="address_line1"
+                            value="{{ current_user.address_line1 or '' }}"
+                            class="form-input"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label>Postinumero</label>
+
+                        <input
+                            type="text"
+                            name="postal_code"
+                            value="{{ current_user.postal_code or '' }}"
+                            class="form-input"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label>Kaupunki</label>
+
+                        <input
+                            type="text"
+                            name="city"
+                            value="{{ current_user.city or '' }}"
+                            class="form-input"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label>Maa</label>
+
+                        <input
+                            type="text"
+                            name="country"
+                            value="{{ current_user.country or '' }}"
+                            class="form-input"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label>Asiakastyyppi</label>
+
+                        <select
+                            name="customer_type"
+                            class="form-input"
+                        >
+
+                            <option
+                                value="private"
+                                {% if current_user.customer_type == "private" %}
+                                    selected
+                                {% endif %}
+                            >
+                                Yksityisasiakas
+                            </option>
+
+                            <option
+                                value="company"
+                                {% if current_user.customer_type == "company" %}
+                                    selected
+                                {% endif %}
+                            >
+                                Yritys
+                            </option>
+
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Yrityksen nimi</label>
+
+                        <input
+                            type="text"
+                            name="company_name"
+                            value="{{ current_user.company_name or '' }}"
+                            class="form-input"
+                        >
+                    </div>
+
+                    <div class="form-group full">
+                        <label>Y-tunnus / VAT</label>
+
+                        <input
+                            type="text"
+                            name="vat_number"
+                            value="{{ current_user.vat_number or '' }}"
+                            class="form-input"
+                        >
+                    </div>
+
                 </div>
 
-                <div class="form-group">
-                    <label>Yrityksen nimi</label>
-                    <input
-                        type="text"
-                        name="company_name"
-                        value="{{ current_user.company_name or '' }}"
-                        class="form-input"
-                    >
-                </div>
+                <button class="save-btn" type="submit">
+                    Tallenna muutokset
+                </button>
 
-                <div class="form-group full">
-                    <label>Y-tunnus / VAT</label>
-                    <input
-                        type="text"
-                        name="vat_number"
-                        value="{{ current_user.vat_number or '' }}"
-                        class="form-input"
-                    >
-                </div>
+            </form>
 
-            </div>
-
-            <button class="save-btn" type="submit">
-                Tallenna tiedot
-            </button>
-
-        </form>
+        </div>
 
     </div>
 
