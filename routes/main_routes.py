@@ -377,6 +377,119 @@ def register_main_routes(app):
         response_data["vehicle_identifier_type"] = vehicle_id_info["type"]
 
         return jsonify(response_data), 200
+    {% extends "base.html" %}
+{% block title %}Korjausohjeet{% endblock %}
+
+{% block extra_css %}
+<style>
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.panel {
+    background: white;
+    color: #0f172a;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    margin-bottom: 20px;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid #cbd5e1;
+    margin-bottom: 12px;
+    font-size: 15px;
+}
+
+textarea {
+    min-height: 100px;
+}
+
+button {
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: none;
+    background: #2563eb;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #1d4ed8;
+}
+
+.item {
+    padding: 12px;
+    border-radius: 12px;
+    background: #f1f5f9;
+    margin-bottom: 10px;
+}
+
+.muted {
+    color: #64748b;
+    font-size: 14px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    <div class="panel">
+        <h2>🔧 Tilaa korjausohje</h2>
+        <p class="muted">
+            Tilaa tarkka vaiheittainen ohje osan vaihtoon. Admin lisää ohjeen järjestelmään.
+        </p>
+
+        {% if error %}
+            <div style="color:red; margin-bottom:10px;">{{ error }}</div>
+        {% endif %}
+
+        {% if success %}
+            <div style="color:green; margin-bottom:10px;">{{ success }}</div>
+        {% endif %}
+
+        <form method="POST">
+            <input name="make" placeholder="Merkki (esim. Volvo)" required>
+
+            <input name="vehicle_input" placeholder="VIN tai rekisterinumero" required>
+
+            <input name="part_name" placeholder="Vaihdettava osa (esim. jakohihna)" required>
+
+            <textarea name="note" placeholder="Lisätiedot (valinnainen)"></textarea>
+
+            <button type="submit">Lähetä pyyntö</button>
+        </form>
+    </div>
+
+    <div class="panel">
+        <h3>📋 Omat pyynnöt</h3>
+
+        {% if items %}
+            {% for item in items %}
+                <div class="item">
+                    <strong>{{ item.make }}</strong> – {{ item.part_name }}<br>
+                    <span class="muted">{{ item.vehicle_input }}</span>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="muted">
+                Ei vielä pyyntöjä.
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}
 
     @app.route("/api/order-repair-guide", methods=["POST"])
     @base_system_required
