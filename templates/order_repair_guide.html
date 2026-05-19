@@ -4,27 +4,27 @@
 {% block extra_css %}
 <style>
 .container {
-    max-width: 900px;
+    max-width: 980px;
     margin: 0 auto;
 }
 
 .panel {
     background: white;
     color: #0f172a;
-    border-radius: 20px;
+    border-radius: 24px;
     padding: 24px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.25);
     margin-bottom: 20px;
 }
 
-h2 {
+h2, h3 {
     margin-top: 0;
 }
 
 input, textarea {
     width: 100%;
-    padding: 12px;
-    border-radius: 12px;
+    padding: 14px;
+    border-radius: 14px;
     border: 1px solid #cbd5e1;
     margin-bottom: 12px;
     font-size: 15px;
@@ -34,30 +34,113 @@ textarea {
     min-height: 100px;
 }
 
-button {
+button, .open-btn {
+    display: inline-block;
     padding: 12px 16px;
     border-radius: 12px;
     border: none;
     background: #2563eb;
     color: white;
-    font-weight: bold;
+    font-weight: 800;
     cursor: pointer;
+    text-decoration: none;
 }
 
-button:hover {
+button:hover, .open-btn:hover {
     background: #1d4ed8;
 }
 
+.request-list {
+    display: grid;
+    gap: 14px;
+}
+
 .item {
-    padding: 12px;
-    border-radius: 12px;
-    background: #f1f5f9;
-    margin-bottom: 10px;
+    padding: 16px;
+    border-radius: 18px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+
+.item-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+}
+
+.item-title {
+    font-size: 17px;
+    font-weight: 900;
+    margin-bottom: 4px;
 }
 
 .muted {
     color: #64748b;
     font-size: 14px;
+    line-height: 1.5;
+}
+
+.status {
+    display: inline-block;
+    padding: 7px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.status-ready {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status-pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.item-actions {
+    margin-top: 14px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.success-msg {
+    color: #166534;
+    background: #dcfce7;
+    border: 1px solid #86efac;
+    padding: 12px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    font-weight: 700;
+}
+
+.error-msg {
+    color: #991b1b;
+    background: #fee2e2;
+    border: 1px solid #fecaca;
+    padding: 12px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    font-weight: 700;
+}
+
+@media (max-width: 700px) {
+    .panel {
+        padding: 18px;
+        border-radius: 20px;
+    }
+
+    .item-top {
+        flex-direction: column;
+    }
+
+    button, .open-btn {
+        width: 100%;
+        text-align: center;
+    }
 }
 </style>
 {% endblock %}
@@ -68,15 +151,16 @@ button:hover {
     <div class="panel">
         <h2>🔧 Tilaa korjausohje</h2>
         <p class="muted">
-            Tilaa tarkka vaiheittainen ohje osan vaihtoon. Admin lisää ohjeen järjestelmään.
+            Tilaa tarkka vaiheittainen ohje osan vaihtoon. Kun ohje on valmis,
+            se jää talteen tälle sivulle ja voit avata sen myöhemmin uudelleen.
         </p>
 
         {% if error %}
-            <div style="color:red; margin-bottom:10px;">{{ error }}</div>
+            <div class="error-msg">{{ error }}</div>
         {% endif %}
 
         {% if success %}
-            <div style="color:green; margin-bottom:10px;">{{ success }}</div>
+            <div class="success-msg">{{ success }}</div>
         {% endif %}
 
         <form method="POST">
@@ -93,15 +177,55 @@ button:hover {
     </div>
 
     <div class="panel">
-        <h3>📋 Omat pyynnöt</h3>
+        <h3>📋 Omat korjausohjeet ja pyynnöt</h3>
 
         {% if items %}
-            {% for item in items %}
-                <div class="item">
-                    <strong>{{ item.make }}</strong> – {{ item.part_name }}<br>
-                    <span class="muted">{{ item.vehicle_input }}</span>
-                </div>
-            {% endfor %}
+            <div class="request-list">
+                {% for item in items %}
+                    <div class="item">
+                        <div class="item-top">
+                            <div>
+                                <div class="item-title">
+                                    {{ item.make }} – {{ item.part_name }}
+                                </div>
+
+                                <div class="muted">
+                                    {{ item.vehicle_input }}
+                                    {% if item.created_at %}
+                                        <br>Pyydetty: {{ item.created_at }}
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div>
+                                {% if item.guide_id %}
+                                    <span class="status status-ready">Valmis</span>
+                                {% else %}
+                                    <span class="status status-pending">Odottaa ohjetta</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {% if item.note %}
+                            <div class="muted" style="margin-top:10px;">
+                                Lisätiedot: {{ item.note }}
+                            </div>
+                        {% endif %}
+
+                        <div class="item-actions">
+                            {% if item.guide_id %}
+                                <a class="open-btn" href="{{ url_for('repair_guide_detail', guide_id=item.guide_id) }}">
+                                    Avaa ohje
+                                </a>
+                            {% else %}
+                                <span class="muted">
+                                    Ohje ei ole vielä valmis.
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
         {% else %}
             <div class="muted">
                 Ei vielä pyyntöjä.
