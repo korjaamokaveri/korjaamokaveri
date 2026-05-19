@@ -62,10 +62,14 @@ def get_user_requests(user_id):
     cur = conn.cursor()
 
     cur.execute("""
-        SELECT *
-        FROM repair_guide_requests
-        WHERE user_id = ?
-        ORDER BY created_at DESC, id DESC
+        SELECT
+            rgr.*,
+            rg.title AS guide_title
+        FROM repair_guide_requests rgr
+        LEFT JOIN repair_guides rg
+            ON rg.id = rgr.guide_id
+        WHERE rgr.user_id = ?
+        ORDER BY rgr.created_at DESC, rgr.id DESC
     """, (user_id,))
 
     rows = cur.fetchall()
