@@ -140,4 +140,87 @@ def suggest_category_for_fault(
 
                 return rule["category"]
 
+    def list_pending_category_suggestions():
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT
+            s.*,
+            f.code,
+            f.title
+        FROM fault_category_suggestions s
+        JOIN fault_codes f ON f.id = s.fault_code_id
+        WHERE s.status = 'pending'
+        ORDER BY s.created_at DESC
+    """)
+
+    rows = cur.fetchall()
+
+    conn.close()
+    return rows
+
+
+def approve_category_suggestion(suggestion_id: int):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT *
+        FROM fault_category_suggestions
+        WHERE id = ?
+    """, (suggestion_id,))
+
+    suggestion = cur.fetchone()
+
+    if not suggestion:
+        conn.close()
+        return False
+
+    category_id = create_category(
+        suggestion["suggested_category_name"]
+    )
+
+    cur.execute("""
+        UPDATE fault_codes
+        SET category_id = ?
+        WHERE id = ?
+    """, (
+        category_id,
+        suggestion["fault_code_id"],
+    ))
+
+    cur.execute("""
+        UPDATE fault_category_suggestions
+        SET status = 'approved',
+            reviewed_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+    """, (suggestion_id,))
+
+    conn.commit()
+    conn.close()
+    
+def reject_category_suggestion(suggestion_id: int):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        UPDATE fault_category_suggestions
+        SET status = 'rejected',
+            reviewed_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+    """, (suggestion_id,))
+
+    conn.commit()
+    conn.close()
+
+    return True
     return None
+
+
+
+
+
+    
+
+    
