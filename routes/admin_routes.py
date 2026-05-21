@@ -622,7 +622,27 @@ def create_from_ticket(diagnosis_id):
             "ticket_id": row["id"],
         },
     )
+@admin_bp.route("/admin/category-suggestions")
+@admin_required
+def admin_category_suggestions():
+    return render_template(
+        "admin_category_suggestions.html",
+        items=list_pending_category_suggestions(),
+    )
 
+
+@admin_bp.route("/admin/category-suggestions/<int:suggestion_id>/approve", methods=["POST"])
+@admin_required
+def admin_approve_category_suggestion(suggestion_id):
+    approve_category_suggestion(suggestion_id)
+    return redirect(url_for("admin.admin_category_suggestions"))
+
+
+@admin_bp.route("/admin/category-suggestions/<int:suggestion_id>/reject", methods=["POST"])
+@admin_required
+def admin_reject_category_suggestion(suggestion_id):
+    reject_category_suggestion(suggestion_id)
+    return redirect(url_for("admin.admin_category_suggestions"))
 
 @admin_bp.route("/admin/answer/<int:diagnosis_id>", methods=["POST"])
 @admin_required
