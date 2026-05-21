@@ -375,6 +375,7 @@ def init_db():
         fail_safe_function TEXT,
         priority TEXT,
         sae_code TEXT
+        category_id INTEGER,
     )
     """)
 
@@ -704,7 +705,10 @@ def init_db():
         cur.execute("ALTER TABLE saved_diagnoses ADD COLUMN requires_resolution_image INTEGER DEFAULT 0")
     except sqlite3.OperationalError:
         pass
-
+    try:
+        cur.execute("ALTER TABLE fault_codes ADD COLUMN category_id INTEGER")
+    except sqlite3.OperationalError:
+        pass
     try:
         cur.execute("""
         DELETE FROM solution_feedback
