@@ -267,3 +267,26 @@ def find_best_guide(make, part_name, vin_prefix=None):
     row = cur.fetchone()
     conn.close()
     return row
+
+def get_repair_guide_by_id_for_user(guide_id: int, user_id: int, is_admin: bool = False):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    if is_admin:
+        cur.execute("""
+            SELECT *
+            FROM repair_guides
+            WHERE id = ?
+        """, (guide_id,))
+    else:
+        cur.execute("""
+            SELECT rg.*
+            FROM repair_guides rg
+            JOIN repair_guide_requests rgr ON rgr.guide_id = rg.id
+            WHERE rg.id = ?
+              AND rgr.user_id = ?
+        """, (guide_id, user_id))
+
+    row = cur.fetchone()
+    conn.close()
+    return row
