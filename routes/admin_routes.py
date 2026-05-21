@@ -18,7 +18,11 @@ from services.fault_code_service import (
     update_fault_code_with_details,
     find_fault_code,
 )
-
+from services.fault_category_service import (
+    list_pending_category_suggestions,
+    approve_category_suggestion,
+    reject_category_suggestion,
+)
 from services.ticket_service import (
     get_open_diagnoses,
     get_unknown_code_tickets,
