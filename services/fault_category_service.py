@@ -53,7 +53,6 @@ def find_category_by_name(name: str):
     """, ((name or "").lower().strip(),))
 
     row = cur.fetchone()
-
     conn.close()
     return row
 
@@ -127,11 +126,8 @@ def suggest_category_for_fault(
     text = f"{code} {title} {description}".lower()
 
     for rule in CATEGORY_RULES:
-
         for keyword in rule["keywords"]:
-
             if keyword.lower() in text:
-
                 create_category_suggestion(
                     fault_code_id=fault_code_id,
                     suggested_category_name=rule["category"],
@@ -140,25 +136,28 @@ def suggest_category_for_fault(
 
                 return rule["category"]
 
-    def list_pending_category_suggestions():
-        conn = get_connection()
-        cur = conn.cursor()
+    return None
 
-        cur.execute("""
-            SELECT
-                s.*,
-                f.code,
-                f.title
-            FROM fault_category_suggestions s
-            JOIN fault_codes f ON f.id = s.fault_code_id
-            WHERE s.status = 'pending'
-            ORDER BY s.created_at DESC
-        """)
 
-        rows = cur.fetchall()
+def list_pending_category_suggestions():
+    conn = get_connection()
+    cur = conn.cursor()
 
-        conn.close()
-        return rows
+    cur.execute("""
+        SELECT
+            s.*,
+            f.code,
+            f.title
+        FROM fault_category_suggestions s
+        JOIN fault_codes f ON f.id = s.fault_code_id
+        WHERE s.status = 'pending'
+        ORDER BY s.created_at DESC
+    """)
+
+    rows = cur.fetchall()
+
+    conn.close()
+    return rows
 
 
 def approve_category_suggestion(suggestion_id: int):
@@ -199,7 +198,10 @@ def approve_category_suggestion(suggestion_id: int):
 
     conn.commit()
     conn.close()
-    
+
+    return True
+
+
 def reject_category_suggestion(suggestion_id: int):
     conn = get_connection()
     cur = conn.cursor()
@@ -215,12 +217,3 @@ def reject_category_suggestion(suggestion_id: int):
     conn.close()
 
     return True
-    return None
-
-
-
-
-
-    
-
-    
