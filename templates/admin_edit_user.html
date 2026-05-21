@@ -1,310 +1,49 @@
 {% extends "base.html" %}
-{% block title %}Käyttäjät{% endblock %}
 
-{% block extra_css %}
-<style>
-
-.admin-page {
-    max-width: 1200px;
-    margin: 40px auto;
-}
-
-.page-header {
-    margin-bottom: 28px;
-}
-
-.page-header h1 {
-    font-size: 42px;
-    margin: 0 0 10px;
-    font-weight: 900;
-}
-
-.page-header p {
-    color: rgba(255,255,255,0.72);
-    font-size: 17px;
-}
-
-.users-card {
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 28px;
-    overflow: hidden;
-    backdrop-filter: blur(14px);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.30);
-}
-
-.users-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.users-table th {
-    text-align: left;
-    padding: 18px;
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: rgba(255,255,255,0.55);
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-}
-
-.users-table td {
-    padding: 18px;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-    color: white;
-    vertical-align: middle;
-}
-
-.users-table tr:last-child td {
-    border-bottom: none;
-}
-
-.user-name {
-    font-weight: 800;
-    margin-bottom: 4px;
-}
-
-.user-email {
-    color: rgba(255,255,255,0.65);
-    font-size: 14px;
-}
-
-.badge {
-    display: inline-block;
-    padding: 8px 12px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 800;
-}
-
-.badge-admin {
-    background: rgba(220,38,38,0.20);
-    color: #fca5a5;
-}
-
-.badge-basic {
-    background: rgba(37,99,235,0.20);
-    color: #93c5fd;
-}
-
-.badge-test {
-    background: rgba(234,179,8,0.20);
-    color: #fde68a;
-}
-
-.edit-btn {
-    display: inline-block;
-    padding: 10px 14px;
-    border-radius: 12px;
-    background: #2563eb;
-    color: white;
-    text-decoration: none;
-    font-weight: 800;
-    transition: 0.2s ease;
-}
-
-.edit-btn:hover {
-    background: #1d4ed8;
-}
-
-.empty-state {
-    padding: 28px;
-    color: rgba(255,255,255,0.7);
-}
-
-.mobile-users {
-    display: none;
-}
-
-@media (max-width: 900px) {
-
-    .users-table {
-        display: none;
-    }
-
-    .mobile-users {
-        display: block;
-        padding: 18px;
-    }
-
-    .mobile-user {
-        background: rgba(255,255,255,0.05);
-        border: 1px solid rgba(255,255,255,0.08);
-        border-radius: 20px;
-        padding: 18px;
-        margin-bottom: 16px;
-    }
-
-    .mobile-user-top {
-        margin-bottom: 14px;
-    }
-
-    .mobile-user .badge {
-        margin-top: 10px;
-    }
-
-    .page-header h1 {
-        font-size: 34px;
-    }
-}
-
-</style>
-{% endblock %}
+{% block title %}Muokkaa käyttäjää{% endblock %}
 
 {% block content %}
+<div style="max-width:900px; margin:40px auto; background:white; color:#0f172a; padding:28px; border-radius:24px;">
 
-<div class="admin-page">
+    <h1>Muokkaa käyttäjää</h1>
 
-    <div class="page-header">
-        <h1>👥 Käyttäjät</h1>
+    {% if success %}
+        <div style="background:#dcfce7; color:#166534; padding:12px; border-radius:12px; margin-bottom:16px;">
+            {{ success }}
+        </div>
+    {% endif %}
 
-        <p>
-            Hallitse käyttäjiä, käyttöoikeuksia ja asiakastietoja.
-        </p>
-    </div>
+    <p><strong>Sähköposti:</strong> {{ user.email }}</p>
 
-    <div class="users-card">
+    <form method="POST">
+        <input name="full_name" value="{{ user.full_name or '' }}" placeholder="Nimi">
+        <input name="phone" value="{{ user.phone or '' }}" placeholder="Puhelin">
+        <input name="address_line1" value="{{ user.address_line1 or '' }}" placeholder="Osoite">
+        <input name="postal_code" value="{{ user.postal_code or '' }}" placeholder="Postinumero">
+        <input name="city" value="{{ user.city or '' }}" placeholder="Kaupunki">
+        <input name="country" value="{{ user.country or '' }}" placeholder="Maa">
 
-        {% if users %}
+        <select name="customer_type">
+            <option value="private" {% if user.customer_type == "private" %}selected{% endif %}>Yksityinen</option>
+            <option value="company" {% if user.customer_type == "company" %}selected{% endif %}>Yritys</option>
+        </select>
 
-            <table class="users-table">
+        <input name="company_name" value="{{ user.company_name or '' }}" placeholder="Yrityksen nimi">
+        <input name="vat_number" value="{{ user.vat_number or '' }}" placeholder="Y-tunnus / VAT">
 
-                <thead>
-                    <tr>
-                        <th>Käyttäjä</th>
-                        <th>Tyyppi</th>
-                        <th>Puhelin</th>
-                        <th>Kaupunki</th>
-                        <th>Toiminnot</th>
-                    </tr>
-                </thead>
+        <select name="account_type">
+            <option value="basic" {% if user.account_type == "basic" %}selected{% endif %}>Basic</option>
+            <option value="test" {% if user.account_type == "test" %}selected{% endif %}>Test</option>
+        </select>
 
-                <tbody>
+        <label style="display:block; margin:16px 0;">
+            <input type="checkbox" name="is_admin" value="1" {% if user.is_admin == 1 %}checked{% endif %}>
+            Admin
+        </label>
 
-                    {% for user in users %}
-                    <tr>
-
-                        <td>
-                            <div class="user-name">
-                                {{ user.full_name or "Ei nimeä" }}
-                            </div>
-
-                            <div class="user-email">
-                                {{ user.email }}
-                            </div>
-                        </td>
-
-                        <td>
-
-                            {% if user.is_admin == 1 %}
-                                <span class="badge badge-admin">
-                                    ADMIN
-                                </span>
-
-                            {% elif user.account_type == "test" %}
-                                <span class="badge badge-test">
-                                    TEST
-                                </span>
-
-                            {% else %}
-                                <span class="badge badge-basic">
-                                    BASIC
-                                </span>
-                            {% endif %}
-
-                        </td>
-
-                        <td>
-                            {{ user.phone or "-" }}
-                        </td>
-
-                        <td>
-                            {{ user.city or "-" }}
-                        </td>
-
-                        <td>
-                            <a
-                                class="edit-btn"
-                                href="{{ url_for('admin.admin_edit_user', user_id=user.id) }}"
-                            >
-                                Muokkaa
-                            </a>
-                        </td>
-
-                    </tr>
-                    {% endfor %}
-
-                </tbody>
-
-            </table>
-
-            <div class="mobile-users">
-
-                {% for user in users %}
-
-                    <div class="mobile-user">
-
-                        <div class="mobile-user-top">
-
-                            <div class="user-name">
-                                {{ user.full_name or "Ei nimeä" }}
-                            </div>
-
-                            <div class="user-email">
-                                {{ user.email }}
-                            </div>
-
-                            {% if user.is_admin == 1 %}
-                                <span class="badge badge-admin">
-                                    ADMIN
-                                </span>
-
-                            {% elif user.account_type == "test" %}
-                                <span class="badge badge-test">
-                                    TEST
-                                </span>
-
-                            {% else %}
-                                <span class="badge badge-basic">
-                                    BASIC
-                                </span>
-                            {% endif %}
-
-                        </div>
-
-                        <div class="user-email">
-                            📞 {{ user.phone or "-" }}
-                        </div>
-
-                        <div class="user-email" style="margin-top:6px;">
-                            📍 {{ user.city or "-" }}
-                        </div>
-
-                        <div style="margin-top:16px;">
-                            <a
-                                class="edit-btn"
-                                href="{{ url_for('admin.admin_edit_user', user_id=user.id) }}"
-                            >
-                                Muokkaa käyttäjää
-                            </a>
-                        </div>
-
-                    </div>
-
-                {% endfor %}
-
-            </div>
-
-        {% else %}
-
-            <div class="empty-state">
-                Käyttäjiä ei löytynyt.
-            </div>
-
-        {% endif %}
-
-    </div>
+        <button class="btn" type="submit">Tallenna</button>
+        <a class="btn" href="{{ url_for('admin.admin_users') }}">Takaisin</a>
+    </form>
 
 </div>
-
 {% endblock %}
