@@ -375,7 +375,7 @@ def init_db():
         fail_safe_function TEXT,
         priority TEXT,
         sae_code TEXT
-        category_id INTEGER,
+        category_id INTEGER
     )
     """)
     cur.execute("""
