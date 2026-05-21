@@ -657,22 +657,3 @@ def register_main_routes(app):
             repair_guide=None,
             can_view_repair_guide=can_user_view_repair_guides(current_user),
         )
-    @app.route("/repair-guide/<int:guide_id>")
-    @base_system_required
-    def repair_guide_detail(guide_id):
-
-        current_user = get_current_user()
-
-        guide = get_repair_guide_by_id_for_user(
-            guide_id=guide_id,
-            user_id=current_user["id"],
-            is_admin=current_user["is_admin"] == 1,
-        )
-
-        if not guide:
-            return "Korjausohjetta ei löytynyt.", 404
-
-        return render_template(
-            "repair_guide_detail.html",
-            guide=guide,
-        )
