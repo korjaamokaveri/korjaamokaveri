@@ -431,7 +431,7 @@ def get_all_users_with_stats():
     conn.close()
     return rows
 
-    def admin_update_user(
+def admin_update_user(
     user_id: int,
     full_name: str,
     phone: str,
