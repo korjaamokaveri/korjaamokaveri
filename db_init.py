@@ -378,7 +378,20 @@ def init_db():
         category_id INTEGER,
     )
     """)
-
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS fault_category_suggestions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        fault_code_id INTEGER NOT NULL,
+        suggested_category_name TEXT NOT NULL,
+        suggested_slug TEXT NOT NULL,
+        reason TEXT,
+        status TEXT NOT NULL DEFAULT 'pending',
+        admin_note TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        reviewed_at DATETIME,
+        FOREIGN KEY (fault_code_id) REFERENCES fault_codes(id)
+   )
+   """)
     cur.execute("""
     CREATE TABLE IF NOT EXISTS possible_causes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
