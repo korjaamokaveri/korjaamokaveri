@@ -143,7 +143,44 @@ def group_fault_codes_by_make(fault_codes):
         grouped[make] = group_by_system(grouped[make])
 
     return grouped
+    
+@app.route("/admin/users/<int:user_id>/edit", methods=["GET", "POST"])
+@admin_required
+def admin_edit_user(user_id):
 
+    user = get_user_by_id(user_id)
+
+    if not user:
+        return "Käyttäjää ei löytynyt", 404
+
+    success = None
+
+    if request.method == "POST":
+
+        admin_update_user(
+            user_id=user_id,
+            full_name=request.form.get("full_name", ""),
+            phone=request.form.get("phone", ""),
+            address_line1=request.form.get("address_line1", ""),
+            postal_code=request.form.get("postal_code", ""),
+            city=request.form.get("city", ""),
+            country=request.form.get("country", ""),
+            customer_type=request.form.get("customer_type", "private"),
+            company_name=request.form.get("company_name", ""),
+            vat_number=request.form.get("vat_number", ""),
+            account_type=request.form.get("account_type", "basic"),
+            is_admin=1 if request.form.get("is_admin") == "1" else 0,
+        )
+
+        success = "Käyttäjän tiedot päivitetty."
+
+        user = get_user_by_id(user_id)
+
+    return render_template(
+        "admin_edit_user.html",
+        user=user,
+        success=success,
+    )
 
 @admin_bp.route("/admin", methods=["GET", "POST"])
 @admin_required
