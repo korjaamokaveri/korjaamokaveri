@@ -374,7 +374,7 @@ def init_db():
         mil_status TEXT,
         fail_safe_function TEXT,
         priority TEXT,
-        sae_code TEXT
+        sae_code TEXT,
         category_id INTEGER
     )
     """)
