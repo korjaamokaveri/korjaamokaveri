@@ -421,7 +421,11 @@ def admin_ticket_detail(diagnosis_id):
 @admin_bp.route("/admin/users")
 @admin_required
 def admin_users():
-    return render_template("admin_users.html", users=get_all_users_with_stats())
+    return render_template(
+        "admin_users.html",
+        users=get_all_users_with_stats(),
+        current_user=get_current_user(),
+    )
 
 
 @admin_bp.route("/admin/accounting")
