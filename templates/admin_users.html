@@ -250,7 +250,7 @@
                                 {% if user.full_name %}
                                     <div class="name">
                                         <a
-                                            href="{{ url_for('admin_edit_user', user_id=user.id) }}"
+                                            href="{{ url_for('admin.admin_edit_user', user_id=user.id) }}"
                                             style="color:#0f172a; text-decoration:none;"
                                         >
                                             {{ user.full_name }}
