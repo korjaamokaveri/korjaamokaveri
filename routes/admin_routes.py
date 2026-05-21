@@ -8,6 +8,7 @@ from werkzeug.utils import secure_filename
 
 from decorators import admin_required, get_current_user
 from utils.import_pdf_dtc import import_pdf
+from services.fault_category_service import suggest_category_for_fault
 
 from services.fault_code_service import (
     get_all_fault_codes,
@@ -222,7 +223,13 @@ def admin():
                 )
 
                 row = find_fault_code(code)
-
+                if row:
+                    suggest_category_for_fault(
+                        fault_code_id=row["id"],
+                        code=row["code"],
+                        title=row["title"],
+                        description=row["description"],
+                )
                 if row:
                     create_ai_enrichment_suggestions(row["id"])
 
