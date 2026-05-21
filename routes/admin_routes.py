@@ -37,6 +37,7 @@ from services.user_service import (
     count_admin_users,
     set_user_account_type,
     set_user_subscription,
+    admin_update_user,
 )
 
 from services.suggestion_service import (
