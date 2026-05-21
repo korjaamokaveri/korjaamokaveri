@@ -32,6 +32,12 @@ from services.repair_guide_service import (
     get_user_requests,
     get_repair_guide_by_id_for_user,
 )
+from services.user_service import (
+    can_user_view_repair_guides,
+    update_user_profile,
+    get_user_by_id,
+    admin_update_user,
+)
 stripe.api_key = Config.STRIPE_SECRET_KEY
 
 ALLOWED_IMAGE_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
