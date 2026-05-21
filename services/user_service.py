@@ -431,3 +431,52 @@ def get_all_users_with_stats():
     conn.close()
     return rows
 
+    def admin_update_user(
+    user_id: int,
+    full_name: str,
+    phone: str,
+    address_line1: str,
+    postal_code: str,
+    city: str,
+    country: str,
+    customer_type: str,
+    company_name: str,
+    vat_number: str,
+    account_type: str,
+    is_admin: int,
+):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        UPDATE users
+        SET
+            full_name = ?,
+            phone = ?,
+            address_line1 = ?,
+            postal_code = ?,
+            city = ?,
+            country = ?,
+            customer_type = ?,
+            company_name = ?,
+            vat_number = ?,
+            account_type = ?,
+            is_admin = ?
+        WHERE id = ?
+    """, (
+        (full_name or "").strip(),
+        (phone or "").strip(),
+        (address_line1 or "").strip(),
+        (postal_code or "").strip(),
+        (city or "").strip(),
+        (country or "").strip(),
+        (customer_type or "private").strip(),
+        (company_name or "").strip(),
+        (vat_number or "").strip(),
+        (account_type or "basic").strip(),
+        int(is_admin),
+        user_id,
+    ))
+
+    conn.commit()
+    conn.close()
