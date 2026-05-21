@@ -141,24 +141,24 @@ def suggest_category_for_fault(
                 return rule["category"]
 
     def list_pending_category_suggestions():
-    conn = get_connection()
-    cur = conn.cursor()
+        conn = get_connection()
+        cur = conn.cursor()
 
-    cur.execute("""
-        SELECT
-            s.*,
-            f.code,
-            f.title
-        FROM fault_category_suggestions s
-        JOIN fault_codes f ON f.id = s.fault_code_id
-        WHERE s.status = 'pending'
-        ORDER BY s.created_at DESC
-    """)
+        cur.execute("""
+            SELECT
+                s.*,
+                f.code,
+                f.title
+            FROM fault_category_suggestions s
+            JOIN fault_codes f ON f.id = s.fault_code_id
+            WHERE s.status = 'pending'
+            ORDER BY s.created_at DESC
+        """)
 
-    rows = cur.fetchall()
+        rows = cur.fetchall()
 
-    conn.close()
-    return rows
+        conn.close()
+        return rows
 
 
 def approve_category_suggestion(suggestion_id: int):
