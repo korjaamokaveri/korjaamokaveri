@@ -1,1 +1,197 @@
+{% extends "base.html" %}
 
+{% block title %}Korjausohje{% endblock %}
+
+{% block extra_css %}
+<style>
+
+.guide-page {
+    max-width: 1000px;
+    margin: 40px auto;
+}
+
+.guide-header {
+    margin-bottom: 28px;
+}
+
+.guide-title {
+    font-size: 44px;
+    font-weight: 900;
+    margin-bottom: 12px;
+    line-height: 1.1;
+}
+
+.guide-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.meta-badge {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: white;
+    padding: 10px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.guide-grid {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 24px;
+}
+
+.guide-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 28px;
+    padding: 28px;
+    backdrop-filter: blur(14px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+}
+
+.section-title {
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 20px;
+}
+
+.guide-content {
+    color: rgba(255,255,255,0.9);
+    line-height: 1.8;
+    font-size: 16px;
+    white-space: pre-line;
+}
+
+.tools-list {
+    white-space: pre-line;
+    color: rgba(255,255,255,0.88);
+    line-height: 1.7;
+}
+
+.notes-box {
+    margin-top: 18px;
+    padding: 18px;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+}
+
+.back-btn {
+    display: inline-block;
+    margin-top: 24px;
+    padding: 14px 18px;
+    border-radius: 16px;
+    background: #2563eb;
+    color: white;
+    text-decoration: none;
+    font-weight: 800;
+}
+
+.back-btn:hover {
+    background: #1d4ed8;
+}
+
+@media (max-width: 900px) {
+
+    .guide-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .guide-title {
+        font-size: 34px;
+    }
+
+    .guide-card {
+        padding: 22px;
+        border-radius: 22px;
+    }
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="guide-page">
+
+    <div class="guide-header">
+
+        <div class="guide-title">
+            {{ guide.title }}
+        </div>
+
+        <div class="guide-meta">
+
+            <div class="meta-badge">
+                {{ guide.make }}
+            </div>
+
+            <div class="meta-badge">
+                {{ guide.part_name }}
+            </div>
+
+            {% if guide.vin_prefix %}
+                <div class="meta-badge">
+                    VIN: {{ guide.vin_prefix }}
+                </div>
+            {% endif %}
+
+        </div>
+
+    </div>
+
+    <div class="guide-grid">
+
+        <div class="guide-card">
+
+            <div class="section-title">
+                🔧 Vaiheittainen korjausohje
+            </div>
+
+            <div class="guide-content">
+                {{ guide.steps }}
+            </div>
+
+            {% if guide.notes %}
+                <div class="notes-box">
+
+                    <div class="section-title" style="font-size:20px;">
+                        📝 Lisähuomiot
+                    </div>
+
+                    <div class="guide-content">
+                        {{ guide.notes }}
+                    </div>
+
+                </div>
+            {% endif %}
+
+            <a
+                href="{{ url_for('order_repair_guide') }}"
+                class="back-btn"
+            >
+                ← Takaisin korjausohjeisiin
+            </a>
+
+        </div>
+
+        <div class="guide-card">
+
+            <div class="section-title">
+                🧰 Tarvittavat työkalut
+            </div>
+
+            <div class="tools-list">
+                {{ guide.tools or "Työkaluja ei lisätty." }}
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
