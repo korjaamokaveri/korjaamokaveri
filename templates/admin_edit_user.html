@@ -1,1 +1,310 @@
+{% extends "base.html" %}
+{% block title %}Käyttäjät{% endblock %}
 
+{% block extra_css %}
+<style>
+
+.admin-page {
+    max-width: 1200px;
+    margin: 40px auto;
+}
+
+.page-header {
+    margin-bottom: 28px;
+}
+
+.page-header h1 {
+    font-size: 42px;
+    margin: 0 0 10px;
+    font-weight: 900;
+}
+
+.page-header p {
+    color: rgba(255,255,255,0.72);
+    font-size: 17px;
+}
+
+.users-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 28px;
+    overflow: hidden;
+    backdrop-filter: blur(14px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.30);
+}
+
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.users-table th {
+    text-align: left;
+    padding: 18px;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255,255,255,0.55);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.users-table td {
+    padding: 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    color: white;
+    vertical-align: middle;
+}
+
+.users-table tr:last-child td {
+    border-bottom: none;
+}
+
+.user-name {
+    font-weight: 800;
+    margin-bottom: 4px;
+}
+
+.user-email {
+    color: rgba(255,255,255,0.65);
+    font-size: 14px;
+}
+
+.badge {
+    display: inline-block;
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.badge-admin {
+    background: rgba(220,38,38,0.20);
+    color: #fca5a5;
+}
+
+.badge-basic {
+    background: rgba(37,99,235,0.20);
+    color: #93c5fd;
+}
+
+.badge-test {
+    background: rgba(234,179,8,0.20);
+    color: #fde68a;
+}
+
+.edit-btn {
+    display: inline-block;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: #2563eb;
+    color: white;
+    text-decoration: none;
+    font-weight: 800;
+    transition: 0.2s ease;
+}
+
+.edit-btn:hover {
+    background: #1d4ed8;
+}
+
+.empty-state {
+    padding: 28px;
+    color: rgba(255,255,255,0.7);
+}
+
+.mobile-users {
+    display: none;
+}
+
+@media (max-width: 900px) {
+
+    .users-table {
+        display: none;
+    }
+
+    .mobile-users {
+        display: block;
+        padding: 18px;
+    }
+
+    .mobile-user {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 20px;
+        padding: 18px;
+        margin-bottom: 16px;
+    }
+
+    .mobile-user-top {
+        margin-bottom: 14px;
+    }
+
+    .mobile-user .badge {
+        margin-top: 10px;
+    }
+
+    .page-header h1 {
+        font-size: 34px;
+    }
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="admin-page">
+
+    <div class="page-header">
+        <h1>👥 Käyttäjät</h1>
+
+        <p>
+            Hallitse käyttäjiä, käyttöoikeuksia ja asiakastietoja.
+        </p>
+    </div>
+
+    <div class="users-card">
+
+        {% if users %}
+
+            <table class="users-table">
+
+                <thead>
+                    <tr>
+                        <th>Käyttäjä</th>
+                        <th>Tyyppi</th>
+                        <th>Puhelin</th>
+                        <th>Kaupunki</th>
+                        <th>Toiminnot</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for user in users %}
+                    <tr>
+
+                        <td>
+                            <div class="user-name">
+                                {{ user.full_name or "Ei nimeä" }}
+                            </div>
+
+                            <div class="user-email">
+                                {{ user.email }}
+                            </div>
+                        </td>
+
+                        <td>
+
+                            {% if user.is_admin == 1 %}
+                                <span class="badge badge-admin">
+                                    ADMIN
+                                </span>
+
+                            {% elif user.account_type == "test" %}
+                                <span class="badge badge-test">
+                                    TEST
+                                </span>
+
+                            {% else %}
+                                <span class="badge badge-basic">
+                                    BASIC
+                                </span>
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+                            {{ user.phone or "-" }}
+                        </td>
+
+                        <td>
+                            {{ user.city or "-" }}
+                        </td>
+
+                        <td>
+                            <a
+                                class="edit-btn"
+                                href="{{ url_for('admin_edit_user', user_id=user.id) }}"
+                            >
+                                Muokkaa
+                            </a>
+                        </td>
+
+                    </tr>
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+            <div class="mobile-users">
+
+                {% for user in users %}
+
+                    <div class="mobile-user">
+
+                        <div class="mobile-user-top">
+
+                            <div class="user-name">
+                                {{ user.full_name or "Ei nimeä" }}
+                            </div>
+
+                            <div class="user-email">
+                                {{ user.email }}
+                            </div>
+
+                            {% if user.is_admin == 1 %}
+                                <span class="badge badge-admin">
+                                    ADMIN
+                                </span>
+
+                            {% elif user.account_type == "test" %}
+                                <span class="badge badge-test">
+                                    TEST
+                                </span>
+
+                            {% else %}
+                                <span class="badge badge-basic">
+                                    BASIC
+                                </span>
+                            {% endif %}
+
+                        </div>
+
+                        <div class="user-email">
+                            📞 {{ user.phone or "-" }}
+                        </div>
+
+                        <div class="user-email" style="margin-top:6px;">
+                            📍 {{ user.city or "-" }}
+                        </div>
+
+                        <div style="margin-top:16px;">
+                            <a
+                                class="edit-btn"
+                                href="{{ url_for('admin_edit_user', user_id=user.id) }}"
+                            >
+                                Muokkaa käyttäjää
+                            </a>
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="empty-state">
+                Käyttäjiä ei löytynyt.
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}
