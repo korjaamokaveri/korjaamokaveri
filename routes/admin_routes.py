@@ -144,7 +144,7 @@ def group_fault_codes_by_make(fault_codes):
 
     return grouped
     
-@app.route("/admin/users/<int:user_id>/edit", methods=["GET", "POST"])
+@admin_bp.route("/admin/users/<int:user_id>/edit", methods=["GET", "POST"])
 @admin_required
 def admin_edit_user(user_id):
 
