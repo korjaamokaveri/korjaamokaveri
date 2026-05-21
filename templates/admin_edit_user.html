@@ -2,48 +2,263 @@
 
 {% block title %}Muokkaa käyttäjää{% endblock %}
 
+{% block extra_css %}
+<style>
+.admin-edit-page {
+    max-width: 980px;
+    margin: 40px auto;
+}
+
+.admin-edit-header {
+    margin-bottom: 28px;
+}
+
+.admin-edit-header h1 {
+    font-size: 42px;
+    margin: 0 0 10px;
+    font-weight: 900;
+}
+
+.admin-edit-header p {
+    color: rgba(255,255,255,0.72);
+    font-size: 17px;
+}
+
+.edit-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 28px;
+    padding: 30px;
+    backdrop-filter: blur(14px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.30);
+}
+
+.success-box {
+    background: rgba(22,163,74,0.18);
+    border: 1px solid rgba(22,163,74,0.35);
+    color: #86efac;
+    padding: 14px 16px;
+    border-radius: 16px;
+    margin-bottom: 22px;
+    font-weight: 800;
+}
+
+.user-summary {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    padding: 18px;
+    margin-bottom: 26px;
+}
+
+.user-email {
+    font-size: 18px;
+    font-weight: 900;
+}
+
+.user-id {
+    color: rgba(255,255,255,0.55);
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group.full {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 800;
+    color: rgba(255,255,255,0.88);
+}
+
+.form-input {
+    width: 100%;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.08);
+    color: white;
+    border-radius: 16px;
+    padding: 15px 16px;
+    font-size: 16px;
+    outline: none;
+}
+
+.form-input:focus {
+    border-color: #3b82f6;
+    background: rgba(255,255,255,0.12);
+    box-shadow: 0 0 0 4px rgba(59,130,246,0.18);
+}
+
+.admin-check {
+    margin-top: 22px;
+    padding: 16px;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+}
+
+.admin-check label {
+    font-weight: 900;
+}
+
+.actions {
+    margin-top: 28px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.save-btn,
+.back-btn {
+    border: none;
+    border-radius: 16px;
+    padding: 15px 20px;
+    font-size: 16px;
+    font-weight: 900;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.save-btn {
+    background: #2563eb;
+    color: white;
+}
+
+.back-btn {
+    background: rgba(255,255,255,0.10);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.14);
+}
+
+@media (max-width: 760px) {
+    .admin-edit-page {
+        margin: 20px auto;
+    }
+
+    .edit-card {
+        padding: 22px;
+        border-radius: 22px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-edit-header h1 {
+        font-size: 34px;
+    }
+}
+</style>
+{% endblock %}
+
 {% block content %}
-<div style="max-width:900px; margin:40px auto; background:white; color:#0f172a; padding:28px; border-radius:24px;">
+<div class="admin-edit-page">
 
-    <h1>Muokkaa käyttäjää</h1>
+    <div class="admin-edit-header">
+        <h1>Muokkaa käyttäjää</h1>
+        <p>Hallinnoi käyttäjän asiakastietoja, roolia ja käyttöoikeuksia.</p>
+    </div>
 
-    {% if success %}
-        <div style="background:#dcfce7; color:#166534; padding:12px; border-radius:12px; margin-bottom:16px;">
-            {{ success }}
+    <div class="edit-card">
+
+        {% if success %}
+            <div class="success-box">{{ success }}</div>
+        {% endif %}
+
+        <div class="user-summary">
+            <div class="user-email">{{ user.email }}</div>
+            <div class="user-id">Käyttäjä-ID: {{ user.id }}</div>
         </div>
-    {% endif %}
 
-    <p><strong>Sähköposti:</strong> {{ user.email }}</p>
+        <form method="POST">
 
-    <form method="POST">
-        <input name="full_name" value="{{ user.full_name or '' }}" placeholder="Nimi">
-        <input name="phone" value="{{ user.phone or '' }}" placeholder="Puhelin">
-        <input name="address_line1" value="{{ user.address_line1 or '' }}" placeholder="Osoite">
-        <input name="postal_code" value="{{ user.postal_code or '' }}" placeholder="Postinumero">
-        <input name="city" value="{{ user.city or '' }}" placeholder="Kaupunki">
-        <input name="country" value="{{ user.country or '' }}" placeholder="Maa">
+            <div class="form-grid">
 
-        <select name="customer_type">
-            <option value="private" {% if user.customer_type == "private" %}selected{% endif %}>Yksityinen</option>
-            <option value="company" {% if user.customer_type == "company" %}selected{% endif %}>Yritys</option>
-        </select>
+                <div class="form-group">
+                    <label>Nimi</label>
+                    <input class="form-input" name="full_name" value="{{ user.full_name or '' }}">
+                </div>
 
-        <input name="company_name" value="{{ user.company_name or '' }}" placeholder="Yrityksen nimi">
-        <input name="vat_number" value="{{ user.vat_number or '' }}" placeholder="Y-tunnus / VAT">
+                <div class="form-group">
+                    <label>Puhelin</label>
+                    <input class="form-input" name="phone" value="{{ user.phone or '' }}">
+                </div>
 
-        <select name="account_type">
-            <option value="basic" {% if user.account_type == "basic" %}selected{% endif %}>Basic</option>
-            <option value="test" {% if user.account_type == "test" %}selected{% endif %}>Test</option>
-        </select>
+                <div class="form-group full">
+                    <label>Osoite</label>
+                    <input class="form-input" name="address_line1" value="{{ user.address_line1 or '' }}">
+                </div>
 
-        <label style="display:block; margin:16px 0;">
-            <input type="checkbox" name="is_admin" value="1" {% if user.is_admin == 1 %}checked{% endif %}>
-            Admin
-        </label>
+                <div class="form-group">
+                    <label>Postinumero</label>
+                    <input class="form-input" name="postal_code" value="{{ user.postal_code or '' }}">
+                </div>
 
-        <button class="btn" type="submit">Tallenna</button>
-        <a class="btn" href="{{ url_for('admin.admin_users') }}">Takaisin</a>
-    </form>
+                <div class="form-group">
+                    <label>Kaupunki</label>
+                    <input class="form-input" name="city" value="{{ user.city or '' }}">
+                </div>
+
+                <div class="form-group">
+                    <label>Maa</label>
+                    <input class="form-input" name="country" value="{{ user.country or '' }}">
+                </div>
+
+                <div class="form-group">
+                    <label>Asiakastyyppi</label>
+                    <select class="form-input" name="customer_type">
+                        <option value="private" {% if user.customer_type == "private" %}selected{% endif %}>Yksityinen</option>
+                        <option value="company" {% if user.customer_type == "company" %}selected{% endif %}>Yritys</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Tilin tyyppi</label>
+                    <select class="form-input" name="account_type">
+                        <option value="basic" {% if user.account_type == "basic" %}selected{% endif %}>Basic</option>
+                        <option value="test" {% if user.account_type == "test" %}selected{% endif %}>Test</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Yrityksen nimi</label>
+                    <input class="form-input" name="company_name" value="{{ user.company_name or '' }}">
+                </div>
+
+                <div class="form-group">
+                    <label>Y-tunnus / VAT</label>
+                    <input class="form-input" name="vat_number" value="{{ user.vat_number or '' }}">
+                </div>
+
+            </div>
+
+            <div class="admin-check">
+                <label>
+                    <input type="checkbox" name="is_admin" value="1" {% if user.is_admin == 1 %}checked{% endif %}>
+                    Käyttäjä on admin
+                </label>
+            </div>
+
+            <div class="actions">
+                <button class="save-btn" type="submit">Tallenna muutokset</button>
+                <a class="back-btn" href="{{ url_for('admin.admin_users') }}">Takaisin käyttäjiin</a>
+            </div>
+
+        </form>
+
+    </div>
 
 </div>
 {% endblock %}
