@@ -2,6 +2,7 @@ import os
 import time
 import sqlite3
 from collections import OrderedDict
+from services.email_service import send_email
 
 from flask import Blueprint, render_template, request, redirect, url_for, current_app
 from werkzeug.utils import secure_filename
@@ -209,7 +210,20 @@ def admin_edit_user(user_id):
         user=user,
         success=success,
     )
+    
+@admin_bp.route("/admin/test-email")
+@admin_required
+def admin_test_email():
+    ok = send_email(
+        "OMA_SAHKOPOSTI",
+        "Korjaamo Kaveri testi",
+        "SMTP toimii oikein."
+    )
 
+    return {
+        "success": ok
+    }
+    
 @admin_bp.route("/admin", methods=["GET", "POST"])
 @admin_required
 def admin():
