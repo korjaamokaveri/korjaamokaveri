@@ -141,13 +141,34 @@ def group_fault_codes_by_make(fault_codes):
         if not make:
             make = "Yleinen"
 
+        category_name = None
+
+        try:
+            category_name = (row["category_name"] or "").strip()
+        except Exception:
+            category_name = ""
+
+        if not category_name:
+            code = (row["code"] or "").upper()
+
+            if code.startswith("P"):
+                category_name = "Engine & Transmission"
+            elif code.startswith("B"):
+                category_name = "Body"
+            elif code.startswith("C"):
+                category_name = "Chassis"
+            elif code.startswith("U"):
+                category_name = "Network"
+            else:
+                category_name = "Muut"
+
         if make not in grouped:
-            grouped[make] = []
+            grouped[make] = OrderedDict()
 
-        grouped[make].append(row)
+        if category_name not in grouped[make]:
+            grouped[make][category_name] = []
 
-    for make in grouped:
-        grouped[make] = group_by_system(grouped[make])
+        grouped[make][category_name].append(row)
 
     return grouped
     
