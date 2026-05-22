@@ -60,25 +60,29 @@ def get_all_fault_codes():
     cur = conn.cursor()
 
     cur.execute("""
-        SELECT
-            id,
-            code,
-            make,
-            title,
-            description,
-            problem_symptoms,
-            mil_status,
-            fail_safe_function,
-            priority,
-            sae_code
-        FROM fault_codes
-        ORDER BY
-            CASE
-                WHEN make IS NULL OR TRIM(make) = '' THEN 'Yleinen'
-                ELSE make
-            END ASC,
-            code ASC
-    """)
+    SELECT
+        f.id,
+        f.code,
+        f.make,
+        f.title,
+        f.description,
+        f.problem_symptoms,
+        f.mil_status,
+        f.fail_safe_function,
+        f.priority,
+        f.sae_code,
+        f.category_id,
+        c.name AS category_name
+    FROM fault_codes f
+    LEFT JOIN fault_categories c
+        ON c.id = f.category_id
+    ORDER BY
+        CASE
+            WHEN f.make IS NULL OR TRIM(f.make) = '' THEN 'Yleinen'
+            ELSE f.make
+        END ASC,
+        f.code ASC
+""")
 
     rows = cur.fetchall()
     conn.close()
