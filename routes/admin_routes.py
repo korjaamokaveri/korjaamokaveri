@@ -21,6 +21,7 @@ from services.fault_code_service import (
 from services.fault_category_service import (
     list_pending_category_suggestions,
     approve_category_suggestion,
+    list_pending_category_suggestions,
     reject_category_suggestion,
 )
 from services.ticket_service import (
