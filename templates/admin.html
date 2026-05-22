@@ -339,7 +339,46 @@
             <div class="panel-subtitle">
                 Vikakoodit on ryhmitelty ensin merkin mukaan ja sen jälkeen järjestelmätyypin mukaan.
             </div>
+            {% if pending_category_suggestions_count > 0 %}
+<div style="
+    margin-bottom:20px;
+    padding:18px;
+    border-radius:18px;
+    background:rgba(37,99,235,0.12);
+    border:1px solid rgba(37,99,235,0.25);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:16px;
+    flex-wrap:wrap;
+">
 
+    <div>
+        <div style="font-size:18px; font-weight:900;">
+            🧠 AI Category Suggestions
+        </div>
+
+        <div style="color:#475569; margin-top:4px;">
+            {{ pending_category_suggestions_count }} odottavaa ehdotusta.
+        </div>
+    </div>
+
+    <a
+        href="{{ url_for('admin.admin_category_suggestions') }}"
+        style="
+            background:#2563eb;
+            color:white;
+            text-decoration:none;
+            padding:12px 16px;
+            border-radius:14px;
+            font-weight:800;
+        "
+    >
+        Tarkista ehdotukset
+    </a>
+
+</div>
+{% endif %}
             {% if grouped_fault_codes %}
                 <div class="group-list">
                     {% for make, system_groups in grouped_fault_codes.items() %}
