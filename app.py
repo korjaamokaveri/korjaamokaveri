@@ -1,3 +1,4 @@
+import os
 from flask import Flask, render_template_string
 
 from dotenv import load_dotenv
@@ -17,6 +18,7 @@ from routes.history_routes import register_history_routes
 from utils.auth import get_current_user
 from utils.config import Config
 from flask_mail import Mail
+
 mail = Mail()
 load_dotenv()
 
