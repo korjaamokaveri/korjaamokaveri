@@ -277,13 +277,16 @@ def admin():
     grouped_fault_codes = group_fault_codes_by_make(fault_codes)
 
     return render_template(
-        "admin.html",
-        error=error,
-        success=success,
-        fault_codes=fault_codes,
-        grouped_fault_codes=grouped_fault_codes,
-        prefill=None,
-    )
+    "admin.html",
+    error=error,
+    success=success,
+    fault_codes=fault_codes,
+    grouped_fault_codes=grouped_fault_codes,
+    prefill=None,
+    pending_category_suggestions_count=len(
+        list_pending_category_suggestions()
+    ),
+)
 
 
 @admin_bp.route("/admin/edit/<int:fault_code_id>", methods=["GET", "POST"])
