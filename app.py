@@ -16,7 +16,8 @@ from routes.auth_routes import register_auth_routes
 from routes.history_routes import register_history_routes
 from utils.auth import get_current_user
 from utils.config import Config
-
+from flask_mail import Mail
+mail = Mail()
 load_dotenv()
 
 
