@@ -34,7 +34,7 @@ def send_email(to_email: str, subject: str, body: str) -> bool:
                 smtp_host,
                 smtp_port,
                 context=context,
-                timeout=20
+                timeout=5
             ) as server:
                 server.login(smtp_user, smtp_password)
                 server.send_message(msg)
@@ -43,7 +43,7 @@ def send_email(to_email: str, subject: str, body: str) -> bool:
             with smtplib.SMTP(
                 smtp_host,
                 smtp_port,
-                timeout=20
+                timeout=5
             ) as server:
                 server.ehlo()
                 server.starttls(context=ssl.create_default_context())
