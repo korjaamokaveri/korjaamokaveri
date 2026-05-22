@@ -336,11 +336,11 @@ def delete_fault_code(fault_code_id: int):
     conn = get_connection()
     cur = conn.cursor()
 
+    cur.execute("DELETE FROM fault_category_suggestions WHERE fault_code_id = ?", (fault_code_id,))
     cur.execute("DELETE FROM possible_causes WHERE fault_code_id = ?", (fault_code_id,))
     cur.execute("DELETE FROM symptom_matches WHERE fault_code_id = ?", (fault_code_id,))
     cur.execute("DELETE FROM test_steps WHERE fault_code_id = ?", (fault_code_id,))
     cur.execute("DELETE FROM vehicle_rules WHERE fault_code_id = ?", (fault_code_id,))
-    cur.execute("DELETE FROM suggested_fault_code_updates WHERE fault_code_id = ?", (fault_code_id,))
     cur.execute("DELETE FROM fault_codes WHERE id = ?", (fault_code_id,))
 
     conn.commit()
