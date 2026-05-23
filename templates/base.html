@@ -191,7 +191,19 @@
             <a href="{{ url_for('login') }}">Kirjaudu</a>
             <a href="{{ url_for('register') }}">Rekisteröidy</a>
 
-        {% endif %}
+            <div style="display:flex; gap:10px; align-items:center;">
+                <a href="{{ url_for('set_language', lang='fi') }}"
+                 style="text-decoration:none; font-size:20px;">
+                🇫🇮
+            </a>
+
+            <a href="{{ url_for('set_language', lang='en') }}"
+               style="text-decoration:none; font-size:20px;">
+                🇬🇧
+            </a>
+        </div>
+
+{% endif %}
     </div>
 
 </div>
