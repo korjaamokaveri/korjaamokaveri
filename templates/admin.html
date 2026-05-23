@@ -240,7 +240,17 @@
             <div class="panel-subtitle">
                 Lataa PDF-tiedosto, josta vikakoodit tuodaan automaattisesti kirjastoon.
             </div>
+            <form
+                action="{{ url_for('admin.admin_import_txt_fault_codes') }}"
+                method="POST"
+                enctype="multipart/form-data"
+            >
+                <input type="file" name="txt_file" accept=".txt" required>
 
+                <button type="submit">
+                Tuo TXT vikakoodit
+                </button>
+            </form>
             <form method="POST" action="/admin/import-dtc-pdf" enctype="multipart/form-data">
                 <div class="field">
                     <label for="pdf_make">Merkki</label>
