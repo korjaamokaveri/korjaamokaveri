@@ -2,7 +2,7 @@ import os
 import time
 
 import stripe
-from flask import render_template, request, jsonify, current_app, redirect, url_for
+from flask import render_template, request, jsonify, current_app, redirect, url_for, session
 from werkzeug.utils import secure_filename
 from services.email_service import send_email
 from utils.config import Config
@@ -82,7 +82,13 @@ def register_main_routes(app):
         if current_user:
             return redirect(url_for("app_home"))
         return render_template("landing.html")
+    @app.route("/set-language/<lang>")
+    def set_language(lang):
+        if lang in ["fi", "en"]:
+            session["lang"] = lang
 
+        return redirect(request.referrer or url_for("landing"))
+        
     @app.route("/app", methods=["GET"])
     @base_system_required
     def app_home():
