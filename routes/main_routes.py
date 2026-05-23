@@ -269,57 +269,57 @@ def register_main_routes(app):
     def privacy():
         return render_template("privacy.html")
 
-   @app.route("/contact", methods=["GET", "POST"])
-   def contact():
+    @app.route("/contact", methods=["GET", "POST"])
+    def contact():
 
-       error = None
-       success = None
-       name = ""
-       email = ""
-       message = ""
+        error = None
+        success = None
+        name = ""
+        email = ""
+        message = ""
 
-   if request.method == "POST":
+    if request.method == "POST":
 
-       name = request.form.get("name", "").strip()
-       email = request.form.get("email", "").strip()
-       message = request.form.get("message", "").strip()
+        name = request.form.get("name", "").strip()
+        email = request.form.get("email", "").strip()
+        message = request.form.get("message", "").strip()
 
-       if not name or not email or not message:
+        if not name or not email or not message:
 
-           error = "Täytä kaikki kentät."
+            error = "Täytä kaikki kentät."
 
-           else:
+            else:
 
-               ok = send_email(
-               to_email="asiakaspalvelu@korjaamokaveri.fi",
-               subject=f"Yhteydenotto: {name}",
-               body=f"""Uusi yhteydenotto Korjaamo Kaverista
+                ok = send_email(
+                to_email="asiakaspalvelu@korjaamokaveri.fi",
+                subject=f"Yhteydenotto: {name}",
+                body=f"""Uusi yhteydenotto Korjaamo Kaverista
 
-    Nimi: {name}
-    Sähköposti: {email}
+     Nimi: {name}
+     Sähköposti: {email}
 
-    Viesti:
-    {message}
-    """
-            )
+     Viesti:
+     {message}
+     """
+             )
 
-            if email.lower() != "asiakaspalvelu@korjaamokaveri.fi":
+             if email.lower() != "asiakaspalvelu@korjaamokaveri.fi":
 
-                send_email(
-                    to_email=email,
-                    subject="Korjaamo Kaveri - viestisi vastaanotettu",
-                    body=f"""Hei {name},
+                 send_email(
+                     to_email=email,
+                     subject="Korjaamo Kaveri - viestisi vastaanotettu",
+                     body=f"""Hei {name},
 
-    Kiitos viestistäsi.
+     Kiitos viestistäsi.
 
-    Olemme vastaanottaneet yhteydenottosi ja vastaamme yleensä 24 tunnin sisällä.
+     Olemme vastaanottaneet yhteydenottosi ja vastaamme yleensä 24 tunnin sisällä.
 
-    Terveisin,
-    Korjaamo Kaveri
-    """
-                    )
+     Terveisin,
+     Korjaamo Kaveri
+     """
+                     )
 
-                if ok:
+                    if ok:
 
                     success = "Viestisi on lähetetty onnistuneesti."
 
@@ -331,7 +331,7 @@ def register_main_routes(app):
 
                     error = "Viestin lähetys epäonnistui."
 
-        return render_template(
+            return render_template(
             "contact.html",
             error=error,
             success=success,
