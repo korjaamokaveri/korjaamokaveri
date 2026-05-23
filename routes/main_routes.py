@@ -291,7 +291,20 @@ def register_main_routes(app):
                     to_email="asiakaspalvelu@korjaamokaveri.fi",
                     subject=f"Yhteydenotto: {name}",
                     body=f"""Uusi yhteydenotto Korjaamo Kaverista
+                
+                send_email(
+                    to_email=email,
+                    subject="Korjaamo Kaveri - viestisi vastaanotettu",
+                    body=f"""Hei {name},
 
+Kiitos viestistäsi.
+
+Olemme vastaanottaneet yhteydenottosi ja vastaamme yleensä 24 tunnin sisällä.
+
+Terveisin,
+Korjaamo Kaveri
+"""
+    )
     Nimi: {name}
     Sähköposti: {email}
 
@@ -317,6 +330,7 @@ def register_main_routes(app):
             email=email,
             message=message,
         )        
+        
     @app.route("/popular-repairs", methods=["GET"])
     def popular_repairs_page():
         return render_template("popular_repairs.html", items=get_popular_repairs())
