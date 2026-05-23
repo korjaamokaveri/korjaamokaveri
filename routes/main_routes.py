@@ -262,11 +262,52 @@ def register_main_routes(app):
     @app.route("/privacy", methods=["GET"])
     def privacy():
         return render_template("privacy.html")
-        
-    @app.route("/contact")
+
+    @app.route("/contact", methods=["GET", "POST"])
     def contact():
-        return render_template("contact.html")
-        
+        error = None
+        success = None
+        name = ""
+        email = ""
+        message = ""
+
+        if request.method == "POST":
+            name = request.form.get("name", "").strip()
+            email = request.form.get("email", "").strip()
+            message = request.form.get("message", "").strip()
+
+        if not name or not email or not message:
+            error = "Täytä kaikki kentät."
+        else:
+            ok = send_email(
+                to_email="asiakaspalvelu@korjaamokaveri.fi",
+                subject=f"Yhteydenotto: {name}",
+                body=f"""Uusi yhteydenotto Korjaamo Kaverista
+
+    Nimi: {name}
+    Sähköposti: {email}
+
+    Viesti:
+    {message}
+    """
+            )
+
+            if ok:
+                success = "Viestisi on lähetetty onnistuneesti."
+                name = ""
+                email = ""
+                message = ""
+            else:
+                error = "Viestin lähetys epäonnistui."
+
+    return render_template(
+        "contact.html",
+        error=error,
+        success=success,
+        name=name,
+        email=email,
+        message=message,
+    )
     @app.route("/popular-repairs", methods=["GET"])
     def popular_repairs_page():
         return render_template("popular_repairs.html", items=get_popular_repairs())
