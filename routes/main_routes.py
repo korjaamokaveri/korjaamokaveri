@@ -283,7 +283,7 @@ def register_main_routes(app):
             else:
                 ok = send_email(
                     to_email="asiakaspalvelu@korjaamokaveri.fi",
-                    ubject=f"Yhteydenotto: {name}",
+                    subject=f"Yhteydenotto: {name}",
                     body=f"""Uusi yhteydenotto Korjaamo Kaverista
 
     Nimi: {name}
