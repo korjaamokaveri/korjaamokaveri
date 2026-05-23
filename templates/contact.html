@@ -4,92 +4,25 @@
 
 {% block extra_css %}
 <style>
-    .contact-wrap {
-        max-width: 900px;
-        margin: 40px auto;
-    }
-
-    .contact-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 24px;
-    }
-
-    .contact-card {
-        background: white;
-        color: #0f172a;
-        border-radius: 24px;
-        padding: 28px;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-    }
-
-    .contact-title {
-        margin: 0 0 10px;
-        font-size: 30px;
-        font-weight: 900;
-        color: white;
-    }
-
-    .contact-subtitle {
-        color: #cbd5e1;
-        margin-bottom: 28px;
-    }
-
-    .contact-card h2 {
-        margin-top: 0;
-        font-size: 22px;
-    }
-
-    .contact-line {
-        margin-top: 14px;
-        line-height: 1.6;
-    }
-
-    .contact-line a {
-        color: #2563eb;
-        font-weight: 800;
-        text-decoration: none;
-    }
-
-    .contact-form {
-        display: flex;
-        flex-direction: column;
-        gap: 14px;
-    }
-
-    .contact-form input,
-    .contact-form textarea {
-        border: 1px solid #cbd5e1;
-        background: #f8fafc;
-        border-radius: 14px;
-        padding: 14px;
-        font-size: 15px;
-    }
-
-    .contact-form textarea {
-        min-height: 140px;
-        resize: vertical;
-    }
-
-    .contact-btn {
-        border: none;
-        border-radius: 14px;
-        padding: 14px;
-        background: #2563eb;
-        color: white;
-        font-size: 16px;
-        font-weight: 800;
-        cursor: pointer;
-    }
-
-    .contact-btn:hover {
-        background: #1d4ed8;
-    }
+    .contact-wrap { max-width: 900px; margin: 40px auto; }
+    .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .contact-card { background: white; color: #0f172a; border-radius: 24px; padding: 28px; box-shadow: 0 20px 60px rgba(0,0,0,0.25); }
+    .contact-title { margin: 0 0 10px; font-size: 30px; font-weight: 900; color: white; }
+    .contact-subtitle { color: #cbd5e1; margin-bottom: 28px; }
+    .contact-card h2 { margin-top: 0; font-size: 22px; }
+    .contact-line { margin-top: 14px; line-height: 1.6; }
+    .contact-line a { color: #2563eb; font-weight: 800; text-decoration: none; }
+    .contact-form { display: flex; flex-direction: column; gap: 14px; }
+    .contact-form input, .contact-form textarea { border: 1px solid #cbd5e1; background: #f8fafc; border-radius: 14px; padding: 14px; font-size: 15px; }
+    .contact-form textarea { min-height: 140px; resize: vertical; }
+    .contact-btn { border: none; border-radius: 14px; padding: 14px; background: #2563eb; color: white; font-size: 16px; font-weight: 800; cursor: pointer; }
+    .contact-btn:hover { background: #1d4ed8; }
+    .alert { margin-bottom: 16px; padding: 14px; border-radius: 14px; font-weight: 800; }
+    .alert-success { background: #dcfce7; color: #166534; }
+    .alert-error { background: #fee2e2; color: #991b1b; }
 
     @media (max-width: 800px) {
-        .contact-grid {
-            grid-template-columns: 1fr;
-        }
+        .contact-grid { grid-template-columns: 1fr; }
     }
 </style>
 {% endblock %}
@@ -127,12 +60,36 @@
         <div class="contact-card">
             <h2>Lähetä viesti</h2>
 
-            <form class="contact-form">
-                <input type="text" placeholder="Nimi">
+            {% if success %}
+                <div class="alert alert-success">{{ success }}</div>
+            {% endif %}
 
-                <input type="email" placeholder="Sähköposti">
+            {% if error %}
+                <div class="alert alert-error">{{ error }}</div>
+            {% endif %}
 
-                <textarea placeholder="Kirjoita viesti..."></textarea>
+            <form class="contact-form" method="POST" action="{{ url_for('contact') }}">
+                <input
+                    type="text"
+                    name="name"
+                    placeholder="Nimi"
+                    value="{{ name or '' }}"
+                    required
+                >
+
+                <input
+                    type="email"
+                    name="email"
+                    placeholder="Sähköposti"
+                    value="{{ email or '' }}"
+                    required
+                >
+
+                <textarea
+                    name="message"
+                    placeholder="Kirjoita viesti..."
+                    required
+                >{{ message or '' }}</textarea>
 
                 <button class="contact-btn" type="submit">
                     Lähetä viesti
