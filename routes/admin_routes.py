@@ -210,7 +210,80 @@ def admin_edit_user(user_id):
         user=user,
         success=success,
     )
-    
+@admin_bp.route("/import-txt-fault-codes", methods=["POST"])
+@admin_required
+def admin_import_txt_fault_codes():
+
+    file = request.files.get("txt_file")
+
+    if not file or not file.filename:
+        return redirect("/admin")
+
+    content = file.read().decode("utf-8", errors="ignore")
+    lines = content.splitlines()
+
+    imported = 0
+    skipped = 0
+
+    conn = get_connection()
+    cur = conn.cursor()
+
+    for raw_line in lines:
+
+        line = raw_line.strip()
+
+        if not line:
+            continue
+
+        parts = [p.strip() for p in line.split("|")]
+
+        if len(parts) < 3:
+            skipped += 1
+            continue
+
+        code = parts[0]
+        title = parts[1]
+        description = parts[2]
+
+        cur.execute(
+            """
+            SELECT id
+            FROM fault_codes
+            WHERE code = %s
+            """,
+            (code,)
+        )
+
+        existing = cur.fetchone()
+
+        if existing:
+            skipped += 1
+            continue
+
+        cur.execute(
+            """
+            INSERT INTO fault_codes (
+                code,
+                title,
+                description,
+                make
+            )
+            VALUES (%s, %s, %s, %s)
+            """,
+            (
+                code,
+                title,
+                description,
+                "Yleinen"
+            )
+        )
+
+        imported += 1
+
+    conn.commit()
+    conn.close()
+
+    return redirect(f"/admin?imported={imported}&skipped={skipped}")    
 @admin_bp.route("/admin/test-email")
 @admin_required
 def admin_test_email():
