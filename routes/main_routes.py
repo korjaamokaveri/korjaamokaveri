@@ -301,7 +301,7 @@ def register_main_routes(app):
     {message}
     """
                 )
-
+                print("CUSTOMER EMAIL:", email, flush=True)
                 send_email(
                     to_email=email,
                     subject="Korjaamo Kaveri - viestisi vastaanotettu",
