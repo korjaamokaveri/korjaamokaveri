@@ -4,7 +4,7 @@ import time
 import stripe
 from flask import render_template, request, jsonify, current_app, redirect, url_for
 from werkzeug.utils import secure_filename
-
+from services.email_service import send_email
 from utils.config import Config
 from utils.auth import get_current_user
 from decorators import base_system_required
