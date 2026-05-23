@@ -188,8 +188,13 @@
 
         {% else %}
 
-            <a href="{{ url_for('login') }}">Kirjaudu</a>
-            <a href="{{ url_for('register') }}">Rekisteröidy</a>
+            <a href="{{ url_for('login') }}">
+                {{ "Login" if session.get("lang") == "en" else "Kirjaudu" }}
+            </a>
+
+            <a href="{{ url_for('register') }}">
+                {{ "Register" if session.get("lang") == "en" else "Rekisteröidy" }}
+            </a>
 
             <div style="display:flex; gap:10px; align-items:center;">
                 <a href="{{ url_for('set_language', lang='fi') }}"
