@@ -284,27 +284,16 @@ def register_main_routes(app):
             message = request.form.get("message", "").strip()
 
             if not name or not email or not message:
+
                 error = "Täytä kaikki kentät."
 
             else:
+
                 ok = send_email(
                     to_email="asiakaspalvelu@korjaamokaveri.fi",
                     subject=f"Yhteydenotto: {name}",
                     body=f"""Uusi yhteydenotto Korjaamo Kaverista
-                
-                send_email(
-                    to_email=email,
-                    subject="Korjaamo Kaveri - viestisi vastaanotettu",
-                    body=f"""Hei {name},
 
-Kiitos viestistäsi.
-
-Olemme vastaanottaneet yhteydenottosi ja vastaamme yleensä 24 tunnin sisällä.
-
-Terveisin,
-Korjaamo Kaveri
-"""
-    )
     Nimi: {name}
     Sähköposti: {email}
 
@@ -313,13 +302,30 @@ Korjaamo Kaveri
     """
                 )
 
+                send_email(
+                    to_email=email,
+                    subject="Korjaamo Kaveri - viestisi vastaanotettu",
+                    body=f"""Hei {name},
+
+    Kiitos viestistäsi.
+
+    Olemme vastaanottaneet yhteydenottosi ja vastaamme yleensä 24 tunnin sisällä.
+
+    Terveisin,
+    Korjaamo Kaveri
+    """
+                )
+ 
                 if ok:
+
                     success = "Viestisi on lähetetty onnistuneesti."
+
                     name = ""
                     email = ""
                     message = ""
 
                 else:
+
                     error = "Viestin lähetys epäonnistui."
 
         return render_template(
@@ -329,7 +335,7 @@ Korjaamo Kaveri
             name=name,
             email=email,
             message=message,
-        )        
+        )
         
     @app.route("/popular-repairs", methods=["GET"])
     def popular_repairs_page():
