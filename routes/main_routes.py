@@ -306,6 +306,12 @@ def register_main_routes(app):
                     to_email=email,
                     subject="Korjaamo Kaveri - viestisi vastaanotettu",
                     body=f"""Hei {name},
+                    
+    if email.lower() != "asiakaspalvelu@korjaamokaveri.fi":
+    send_email(
+        to_email=email,
+        subject="Korjaamo Kaveri - viestisi vastaanotettu",
+        body=f"""Hei {name},
 
     Kiitos viestistäsi.
 
