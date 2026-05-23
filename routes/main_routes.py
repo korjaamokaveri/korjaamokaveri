@@ -278,22 +278,22 @@ def register_main_routes(app):
        email = ""
        message = ""
 
-    if request.method == "POST":
+   if request.method == "POST":
 
-        name = request.form.get("name", "").strip()
-        email = request.form.get("email", "").strip()
-        message = request.form.get("message", "").strip()
+       name = request.form.get("name", "").strip()
+       email = request.form.get("email", "").strip()
+       message = request.form.get("message", "").strip()
 
-        if not name or not email or not message:
+       if not name or not email or not message:
 
-            error = "Täytä kaikki kentät."
+           error = "Täytä kaikki kentät."
 
-        else:
+           else:
 
-            ok = send_email(
-                to_email="asiakaspalvelu@korjaamokaveri.fi",
-                subject=f"Yhteydenotto: {name}",
-                body=f"""Uusi yhteydenotto Korjaamo Kaverista
+               ok = send_email(
+               to_email="asiakaspalvelu@korjaamokaveri.fi",
+               subject=f"Yhteydenotto: {name}",
+               body=f"""Uusi yhteydenotto Korjaamo Kaverista
 
     Nimi: {name}
     Sähköposti: {email}
