@@ -410,8 +410,10 @@
                                                     C – Chassis
                                                 {% elif system == "U" %}
                                                     U – Network
-                                                {% else %}
+                                                {% elif system == "Other" %}
                                                     Muut
+                                                {% else %}
+                                                    {{ system }}
                                                 {% endif %}
                                             </span>
                                             <span class="make-count">{{ codes|length }} kpl</span>
