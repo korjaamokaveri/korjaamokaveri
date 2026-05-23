@@ -28,3 +28,4 @@ urllib3==2.6.3
 Werkzeug==3.1.6
 psycopg2-binary
 Flask-Mail==0.10.0
+resend
