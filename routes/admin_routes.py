@@ -215,7 +215,7 @@ def admin_edit_user(user_id):
 @admin_required
 def admin_test_email():
     ok = send_email(
-        "OMA_SAHKOPOSTI",
+        "ville_salovaara@hotmail.com",
         "Korjaamo Kaveri testi",
         "SMTP toimii oikein."
     )
