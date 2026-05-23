@@ -6,7 +6,8 @@ from services.email_service import send_email
 
 from flask import Blueprint, render_template, request, redirect, url_for, current_app
 from werkzeug.utils import secure_filename
-
+from flask import request, redirect
+from db import get_connection
 from decorators import admin_required, get_current_user
 from utils.import_pdf_dtc import import_pdf
 from services.fault_category_service import suggest_category_for_fault
